@@ -1,0 +1,5 @@
+agents:
+  PhysicalControlsAgent:
+    entrypoint: src.main:app
+    memory:
+      mode: NO_MEMORY
