@@ -1,1 +1,15 @@
-# requirements del proyecto (contenido original)
+boto3
+anthropic
+ipykernel
+python-dotenv
+pdfplumber
+python-docx
+pyyaml
+chromadb
+sentence_transformers
+matplotlib
+numpy
+pandas
+tiktoken
+langdetect
+wordcloud
