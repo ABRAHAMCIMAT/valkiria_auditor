@@ -1,0 +1,523 @@
+# Registro de Riesgos de Seguridad de la Informacion — ACME Corp
+# ISO 27001:2022 — Anexo A
+# Fecha de actualizacion: 2025-06-20
+# Responsable: Ing. Maria Lopez (CISO)
+# Metodologia: ISO 27005:2022 + Matriz 5x5 (Probabilidad x Impacto)
+
+metadata:
+  organization: ACME Corp S.A. de C.V.
+  scope: SGSI - Todas las ubicaciones y servicios
+  risk_appetite: Moderado (riesgo residual aceptable <= 9)
+  review_frequency: Trimestral
+  last_review: 2025-06-20
+  next_review: 2025-09-20
+  methodology: ISO 27005:2022
+  scale:
+    probability: "1=Muy baja, 2=Baja, 3=Media, 4=Alta, 5=Muy alta"
+    impact: "1=Insignificante, 2=Menor, 3=Moderado, 4=Mayor, 5=Catastrofico"
+    risk_level: "1-4=Bajo, 5-9=Medio, 10-15=Alto, 16-25=Critico"
+
+risks:
+  # ─────────────────────────────────────────────────────────────────
+  # RIESGOS TECNOLOGICOS (A.8)
+  # ─────────────────────────────────────────────────────────────────
+
+  - id: R-001
+    title: Explotacion de vulnerabilidades criticas en aplicacion web
+    description: >
+      Atacante externo explota vulnerabilidades de inyeccion SQL, XSS o SSRF
+      en el portal SGSI para obtener acceso no autorizado a datos confidenciales
+      de clientes y reportes de auditoria.
+    category: Technological
+    threat: External attacker / Automated exploitation
+    vulnerability: 18 vulnerabilidades SAST + 11 alertas DAST sin remediar
+    asset: Portal SGSI (sgsi.acme-corp.com)
+    controls_related:
+      - A.8.26
+      - A.8.28
+      - A.8.5
+    probability: 4
+    impact: 5
+    inherent_risk: 20
+    existing_controls:
+      - WAF basico en CloudFront
+      - SonarQube en CI/CD (deteccion sin bloqueo)
+      - Code review obligatorio
+    control_effectiveness: Baja
+    residual_probability: 4
+    residual_impact: 5
+    residual_risk: 20
+    risk_level: Critico
+    treatment: Mitigar
+    treatment_plan: >
+      1. Remediar vulnerabilidades criticas en 7 dias (SQL injection, JWT bypass).
+      2. Implementar WAF con reglas OWASP Core Rule Set.
+      3. Bloquear merge en CI si SonarQube detecta vulnerabilidades High/Critical.
+      4. Actualizar dependencias vulnerables (Django, cryptography, Pillow).
+    owner: Ing. Roberto Sanchez (Lider Tecnico)
+    due_date: 2025-07-15
+    status: En tratamiento
+
+  - id: R-002
+    title: Compromiso de credenciales por debilidad criptografica
+    description: >
+      Las debilidades criptograficas (MD5 para passwords, TLS 1.0/1.1, JWT con
+      algoritmo none) permiten a un atacante obtener credenciales validas mediante
+      ataques de fuerza bruta, interceptacion de trafico o forjado de tokens.
+    category: Technological
+    threat: External attacker / Credential theft
+    vulnerability: Algoritmos debiles, configuracion TLS insegura, JWT sin validacion
+    asset: Sistema de autenticacion
+    controls_related:
+      - A.8.24
+      - A.8.5
+    probability: 4
+    impact: 4
+    inherent_risk: 16
+    existing_controls:
+      - MFA para sistemas criticos
+      - Bloqueo tras 5 intentos (solo login web)
+    control_effectiveness: Media
+    residual_probability: 3
+    residual_impact: 4
+    residual_risk: 12
+    risk_level: Alto
+    treatment: Mitigar
+    treatment_plan: >
+      1. Migrar hashing de passwords a bcrypt/argon2.
+      2. Deshabilitar TLS 1.0/1.1, permitir solo TLS 1.2+ con cipher suites fuertes.
+      3. Rechazar JWT con algoritmo 'none', validar firma con clave especifica.
+      4. Implementar rate limiting en MFA.
+      5. Actualizar python-jose y paramiko.
+    owner: Ing. Roberto Sanchez
+    due_date: 2025-07-30
+    status: En tratamiento
+
+  - id: R-003
+    title: Fuga de datos por vulnerabilidad IDOR en API
+    description: >
+      Un usuario autenticado puede acceder a reportes de auditoria y documentos
+      confidenciales de otros usuarios modificando el parametro de ID en las
+      peticiones API, sin que exista verificacion de autorizacion del lado servidor.
+    category: Technological
+    threat: Insider / Authenticated user
+    vulnerability: Falta de verificacion de autorizacion por objeto (IDOR)
+    asset: API de reportes y documentos
+    controls_related:
+      - A.8.3
+      - A.8.12
+    probability: 4
+    impact: 4
+    inherent_risk: 16
+    existing_controls:
+      - Autenticacion requerida (pero sin autorizacion por recurso)
+      - Logs de acceso (sin alertas por patron anomalo)
+    control_effectiveness: Baja
+    residual_probability: 4
+    residual_impact: 4
+    residual_risk: 16
+    risk_level: Critico
+    treatment: Mitigar
+    treatment_plan: >
+      1. Implementar autorizacion a nivel de objeto en todos los endpoints.
+      2. Reemplazar IDs secuenciales por UUIDs.
+      3. Agregar regla SIEM para deteccion de enumeracion de IDs.
+      4. Prueba de penetracion focalizada en autorizacion.
+    owner: Ing. Roberto Sanchez
+    due_date: 2025-07-15
+    status: En tratamiento
+
+  - id: R-004
+    title: Ejecucion de codigo malicioso via upload sin validacion
+    description: >
+      Un atacante puede subir archivos ejecutables (PHP, Python, shell scripts)
+      al endpoint de upload que no valida contenido. Los archivos se almacenan
+      en directorio publico ejecutable, permitiendo ejecucion remota de codigo.
+    category: Technological
+    threat: External attacker / Malware upload
+    vulnerability: Upload sin validacion de contenido ni extension
+    asset: Endpoint de carga de documentos
+    controls_related:
+      - A.8.7
+      - A.8.26
+    probability: 3
+    impact: 5
+    inherent_risk: 15
+    existing_controls:
+      - Content-Type header check (facilmente eludible)
+    control_effectiveness: Muy baja
+    residual_probability: 3
+    residual_impact: 5
+    residual_risk: 15
+    risk_level: Alto
+    treatment: Mitigar
+    treatment_plan: >
+      1. Validar contenido con magic bytes (no solo Content-Type header).
+      2. Whitelist de extensiones permitidas (.pdf, .docx, .xlsx, .csv).
+      3. Almacenar fuera de web root (S3 con acceso solo via presigned URL).
+      4. Implementar escaneo antivirus pre-almacenamiento.
+      5. Renombrar archivos con UUID al almacenar.
+    owner: Equipo de Desarrollo
+    due_date: 2025-07-30
+    status: Pendiente
+
+  - id: R-005
+    title: Dependencias con vulnerabilidades conocidas sin parchar
+    description: >
+      23 dependencias Python presentan vulnerabilidades conocidas (CVEs publicados),
+      incluyendo 3 criticas que permiten ejecucion remota de codigo (Pillow buffer
+      overflow, setuptools RCE, Werkzeug path traversal) y no han sido actualizadas.
+    category: Technological
+    threat: External attacker / Supply chain
+    vulnerability: Dependencias desactualizadas con CVEs criticos
+    asset: Aplicacion backend (Python)
+    controls_related:
+      - A.8.26
+      - A.8.28
+      - A.8.25
+    probability: 3
+    impact: 4
+    inherent_risk: 12
+    existing_controls:
+      - Dependency Check en pipeline (reporta pero no bloquea)
+      - SLA de remediacion (no cumplido)
+    control_effectiveness: Baja
+    residual_probability: 3
+    residual_impact: 4
+    residual_risk: 12
+    risk_level: Alto
+    treatment: Mitigar
+    treatment_plan: >
+      1. Actualizar dependencias criticas inmediatamente (Pillow, setuptools, Werkzeug).
+      2. Configurar Dependabot/Renovate para PRs automaticos de actualizacion.
+      3. Bloquear merge si Dependency Check encuentra High/Critical.
+      4. Revision mensual de deuda de seguridad en dependencias.
+    owner: Tech Lead de cada equipo
+    due_date: 2025-07-07
+    status: Pendiente
+
+  # ─────────────────────────────────────────────────────────────────
+  # RIESGOS ORGANIZACIONALES (A.5)
+  # ─────────────────────────────────────────────────────────────────
+
+  - id: R-006
+    title: Acceso persistente de ex-empleados a sistemas cloud
+    description: >
+      Los procesos de offboarding no revocan accesos a servicios cloud (AWS, GitHub,
+      Jira) el mismo dia de la baja. En un caso documentado, una cuenta AWS permanecio
+      activa 23 dias post-salida, permitiendo acceso a infraestructura critica.
+    category: Organizational
+    threat: Former employee / Insider threat
+    vulnerability: Proceso de offboarding incompleto y no automatizado
+    asset: Infraestructura cloud (AWS, GitHub, Jira)
+    controls_related:
+      - A.5.15
+      - A.6.5
+    probability: 4
+    impact: 4
+    inherent_risk: 16
+    existing_controls:
+      - Checklist de offboarding (cumplimiento 73.3%)
+      - Desactivacion de red el mismo dia (85%)
+    control_effectiveness: Media
+    residual_probability: 3
+    residual_impact: 4
+    residual_risk: 12
+    risk_level: Alto
+    treatment: Mitigar
+    treatment_plan: >
+      1. Integrar RRHH con IAM para desactivacion automatica de cuentas cloud.
+      2. Implementar SCIM provisioning con IdP (Okta/Azure AD).
+      3. Script automatico de revocacion que cubra AWS, GitHub, Jira, Slack.
+      4. Alerta si cuenta no desactivada en 4 horas post-notificacion de baja.
+    owner: CISO + Gerente de TI
+    due_date: 2025-08-30
+    status: En planificacion
+
+  - id: R-007
+    title: Incapacidad de recuperacion ante desastre en ERP
+    description: >
+      El RTO declarado de 12 horas para el ERP (SAP) nunca ha sido validado con
+      prueba practica. No existe plan documentado para falla electrica prolongada.
+      Un desastre real podria resultar en perdida de datos y tiempo de recuperacion
+      significativamente mayor al esperado.
+    category: Organizational
+    threat: Natural disaster / Infrastructure failure
+    vulnerability: Plan de DR no probado, RTO no validado
+    asset: ERP SAP + datos financieros
+    controls_related:
+      - A.5.29
+      - A.5.30
+    probability: 2
+    impact: 5
+    inherent_risk: 10
+    existing_controls:
+      - Backup diario
+      - DR frio en us-west-2
+      - Ejercicios tabletop (sin prueba tecnica real)
+    control_effectiveness: Media
+    residual_probability: 2
+    residual_impact: 4
+    residual_risk: 8
+    risk_level: Medio
+    treatment: Mitigar
+    treatment_plan: >
+      1. Ejecutar prueba completa de DR con restauracion de ERP en Q3 2025.
+      2. Documentar plan para falla electrica >4 horas.
+      3. Validar RTO real vs declarado, ajustar si es necesario.
+      4. Contratar planta de emergencia dedicada o servicio portable.
+    owner: Gerente de TI
+    due_date: 2025-09-30
+    status: Pendiente
+
+  - id: R-008
+    title: Fuga de informacion por empleado saliente (insider threat)
+    description: >
+      Empleados con acceso a informacion confidencial pueden exfiltrar datos antes
+      o durante el proceso de salida. El incidente de noviembre 2024 demostro que
+      los controles DLP actuales son insuficientes y el tiempo de respuesta excesivo.
+    category: Organizational
+    threat: Insider / Departing employee
+    vulnerability: Sin DLP efectivo, retraso en revocacion de accesos
+    asset: Bases de datos de clientes, propiedad intelectual
+    controls_related:
+      - A.5.12
+      - A.8.12
+      - A.6.5
+    probability: 3
+    impact: 5
+    inherent_risk: 15
+    existing_controls:
+      - NDA firmado
+      - Monitoreo basico de transferencias >100MB
+      - Proceso disciplinario
+    control_effectiveness: Baja
+    residual_probability: 3
+    residual_impact: 4
+    residual_risk: 12
+    risk_level: Alto
+    treatment: Mitigar
+    treatment_plan: >
+      1. Implementar solucion DLP (Microsoft Purview o similar).
+      2. Monitoreo reforzado de actividad en periodo de preaviso.
+      3. Restriccion inmediata de acceso a datos confidenciales al notificar renuncia.
+      4. Bloqueo de USB y servicios de almacenamiento personal en periodo de salida.
+    owner: CISO
+    due_date: 2025-09-15
+    status: En planificacion
+
+  # ─────────────────────────────────────────────────────────────────
+  # RIESGOS DE PERSONAS (A.6)
+  # ─────────────────────────────────────────────────────────────────
+
+  - id: R-009
+    title: Compromiso via ingenieria social (phishing dirigido)
+    description: >
+      A pesar de la tendencia positiva en simulaciones, un 7.6% de empleados aun
+      hace clic en enlaces de phishing y un 1.7% ingresa credenciales. Un ataque
+      dirigido (spear phishing) a ejecutivos o personal con acceso privilegiado
+      podria resultar en compromiso de cuentas criticas.
+    category: People
+    threat: External attacker / Social engineering
+    vulnerability: Factor humano, capacitacion incompleta
+    asset: Credenciales de usuarios privilegiados
+    controls_related:
+      - A.6.3
+      - A.8.5
+      - A.5.24
+    probability: 3
+    impact: 4
+    inherent_risk: 12
+    existing_controls:
+      - Simulaciones de phishing trimestrales
+      - MFA en sistemas criticos
+      - Filtro anti-phishing en correo
+      - Canal de reporte de incidentes
+    control_effectiveness: Media-Alta
+    residual_probability: 2
+    residual_impact: 3
+    residual_risk: 6
+    risk_level: Medio
+    treatment: Mitigar
+    treatment_plan: >
+      1. Simulaciones mensuales (en lugar de trimestrales) para personal de alto riesgo.
+      2. Capacitacion personalizada para empleados que fallan simulaciones repetidamente.
+      3. Implementar phishing-resistant MFA (FIDO2/WebAuthn) para ejecutivos y admins.
+      4. Revisiones periodicas de reglas de correo (forwarding rules, filters).
+    owner: Lic. Ana Martinez (RRHH) + CISO
+    due_date: 2025-08-15
+    status: En tratamiento
+
+  - id: R-010
+    title: Compromiso de equipo en trabajo remoto
+    description: >
+      Empleados remotos sin MDM completo (40%) acceden a sistemas corporativos
+      desde redes no controladas. Sin verificacion de VPN continua ni control
+      de copias locales, un equipo comprometido o robado expone datos corporativos.
+    category: People
+    threat: External attacker / Physical theft / Unsecured networks
+    vulnerability: MDM incompleto, sin verificacion de VPN, sin DLP en endpoints
+    asset: Laptops corporativas con datos de clientes
+    controls_related:
+      - A.6.7
+      - A.7.9
+      - A.8.12
+    probability: 3
+    impact: 3
+    inherent_risk: 9
+    existing_controls:
+      - Cifrado de disco (100%)
+      - VPN disponible (uso no verificado)
+      - EDR (CrowdStrike)
+    control_effectiveness: Media
+    residual_probability: 2
+    residual_impact: 3
+    residual_risk: 6
+    risk_level: Medio
+    treatment: Mitigar
+    treatment_plan: >
+      1. Desplegar MDM completo (Intune/Jamf) en 100% de laptops.
+      2. Configurar Always-On VPN para forzar trafico por tunel corporativo.
+      3. Habilitar borrado remoto en 100% de dispositivos.
+      4. Politica de DLP en endpoint (bloquear copia a USB no autorizado).
+    owner: Gerente de TI
+    due_date: 2025-10-30
+    status: Pendiente
+
+  # ─────────────────────────────────────────────────────────────────
+  # RIESGOS FISICOS (A.7)
+  # ─────────────────────────────────────────────────────────────────
+
+  - id: R-011
+    title: Acceso fisico no autorizado en oficina MTY
+    description: >
+      La oficina de Monterrey carece de vigilancia nocturna propia, camara de CCTV
+      fuera de servicio, y acceso al piso sin control fuera de horario. Un intruso
+      podria acceder a equipos de computo y documentos fuera del horario laboral.
+    category: Physical
+    threat: External intruder / Theft
+    vulnerability: Controles fisicos debiles en ubicacion MTY
+    asset: Equipos de computo y documentos en oficina MTY
+    controls_related:
+      - A.7.1
+      - A.7.2
+      - A.7.4
+    probability: 2
+    impact: 3
+    inherent_risk: 6
+    existing_controls:
+      - Puerta con PIN + tarjeta
+      - 3 camaras operativas (de 4)
+      - Cifrado de disco en equipos
+    control_effectiveness: Media
+    residual_probability: 2
+    residual_impact: 2
+    residual_risk: 4
+    risk_level: Bajo
+    treatment: Aceptar
+    treatment_plan: >
+      1. Reparar camara fuera de servicio (inmediato).
+      2. Negociar con administracion del edificio control de acceso al piso fuera de horario.
+      3. Incrementar retencion de CCTV a minimo 15 dias.
+      4. Evaluar costo-beneficio de alarma independiente.
+    owner: Ing. Pedro Gutierrez (Facilities)
+    due_date: 2025-07-30
+    status: Parcialmente tratado
+
+  - id: R-012
+    title: Perdida de servicio por falla electrica sin redundancia
+    description: >
+      La oficina de MTY no tiene UPS y la planta de emergencia de CDMX no ha sido
+      verificada. Una falla electrica prolongada causaria indisponibilidad inmediata
+      en MTY y potencial corrupcion de datos en equipos de red.
+    category: Physical
+    threat: Power outage / Infrastructure failure
+    vulnerability: Sin UPS en MTY, planta no verificada en CDMX
+    asset: Servicios de TI en MTY, sala de servidores CDMX
+    controls_related:
+      - A.7.11
+      - A.5.29
+    probability: 3
+    impact: 3
+    inherent_risk: 9
+    existing_controls:
+      - UPS en sala de servidores CDMX (25 min)
+      - Planta del edificio (SLA 15 min, no verificado)
+      - Servicios criticos en AWS (no afectados por falla local)
+    control_effectiveness: Media
+    residual_probability: 2
+    residual_impact: 2
+    residual_risk: 4
+    risk_level: Bajo
+    treatment: Mitigar
+    treatment_plan: >
+      1. Adquirir UPS para rack de comunicaciones en MTY.
+      2. Solicitar prueba de transferencia de planta a administracion edificio CDMX.
+      3. Documentar plan de contingencia para falla >4 horas.
+    owner: Ing. Pedro Gutierrez
+    due_date: 2025-08-30
+    status: Pendiente
+
+  - id: R-013
+    title: Fuga de informacion por eliminacion insegura de medios
+    description: >
+      Impresoras multifuncionales enviadas a reciclaje sin borrado de memoria interna.
+      SSDs de laptops retiradas pendientes de destruccion por 2 meses. Proveedor de
+      destruccion de documentos sin certificado para un lote. Datos residuales podrian
+      ser recuperados por terceros no autorizados.
+    category: Physical
+    threat: Data recovery from discarded media
+    vulnerability: Proceso de eliminacion incompleto, medios pendientes de destruccion
+    asset: Datos en medios de almacenamiento retirados
+    controls_related:
+      - A.7.10
+      - A.7.14
+    probability: 2
+    impact: 3
+    inherent_risk: 6
+    existing_controls:
+      - Proceso de baja documentado (NIST 800-88)
+      - Destruccion certificada para HDDs y servidores
+      - Almacenamiento seguro temporal (cajon con llave en sala de servidores)
+    control_effectiveness: Media
+    residual_probability: 1
+    residual_impact: 3
+    residual_risk: 3
+    risk_level: Bajo
+    treatment: Mitigar
+    treatment_plan: >
+      1. Ejecutar borrado criptografico de 6 SSDs pendientes esta semana.
+      2. Exigir certificado de destruccion a DataGuard MX para lotes pendientes.
+      3. Incluir borrado de memoria en proceso de baja de impresoras.
+      4. Establecer SLA maximo de 30 dias para procesamiento de medios retirados.
+    owner: Ing. Roberto Sanchez
+    due_date: 2025-07-15
+    status: En tratamiento
+
+# ─────────────────────────────────────────────────────────────────
+# RESUMEN DE RIESGOS
+# ─────────────────────────────────────────────────────────────────
+
+summary:
+  total_risks: 13
+  by_level:
+    critico: 2
+    alto: 5
+    medio: 3
+    bajo: 3
+  by_category:
+    technological: 5
+    organizational: 3
+    people: 2
+    physical: 3
+  by_treatment:
+    mitigar: 11
+    aceptar: 1
+    parcialmente_tratado: 1
+  by_status:
+    en_tratamiento: 5
+    pendiente: 5
+    en_planificacion: 2
+    parcialmente_tratado: 1
+  risk_appetite_exceeded: 7
+  average_residual_risk: 9.1
