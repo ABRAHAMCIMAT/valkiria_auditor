@@ -1,0 +1,125 @@
+[
+  {
+    "clause_to_evaluate": "Clausula 6.1.3 - Tratamiento de riesgos de seguridad de la información\nRequisitos especificos:\na) Seleccionar opciones de tratamiento de riesgos de seguridad de la información apropiadas, considerando los resultados del análisis.\nb) Determinar todos los controles necesarios para implementar la opción o opciones seleccionadas de tratamiento de riesgos (pudiendo usar el Anexo A como referencia).\nc) Comparar los controles determinados con los del Anexo A para asegurar que no se haya omitido ningún control necesario.\nd) Producir una Declaración de Aplicabilidad (SoA) que contenga los controles necesarios, las justificaciones de inclusión/exclusión y el estado de implementación.\ne) Formular un plan de tratamiento de riesgos de seguridad de la información y obtener la aprobación de los dueños del riesgo para dicho plan y la aceptación de los riesgos residuales.\nf) Retener información documentada sobre el proceso de tratamiento de riesgos.",
+    "retrieved_context": [
+      {
+        "document": "Plan_Tratamiento_Riesgos_2025.pdf",
+        "content": "Se identificaron 15 riesgos críticos de negocio en la última sesión. El equipo de TI determinó de manera interna que se mitigarán comprando un nuevo software de monitoreo de logs el próximo año. No se realizó ninguna comparativa con los controles del Anexo A para verificar omisiones. No existe un documento de Declaración de Aplicabilidad (SoA) en la organización. El plan no cuenta con firmas de aprobación de los directores de área debido a que los dueños de los riesgos no han sido formalmente asignados ni han aceptado los riesgos residuales."
+      }
+    ],
+    "expected_severity": "No conformidad mayor"
+  },
+  {
+    "clause_to_evaluate": "Clausula 9.2 - Auditoría interna\nLa organización debe llevar a cabo auditorías internas a intervalos planificados para proporcionar información sobre el estado del SGSI.\nRequisitos especificos:\na) Se conforma con los requisitos propios de la organización para su sistema de gestión de la seguridad de la información.\nb) Se conforma con los requisitos de esta Norma Internacional.\nc) Se implementa y se mantiene eficazmente.\nd) Planificar, establecer, implementar y mantener un programa de auditoría (o programas), que incluya la frecuencia, los métodos, las responsabilidades, los requisitos de planificación y la de elaboración de informes.\ne) El programa (o programas) de auditoría debe tomar en consideración la importancia de los procesos involucrados y los resultados de las auditorías anteriores.\nf) Definir los criterios de auditoría y el alcance para cada auditoría individual.\ng) Seleccionar auditores y realizar auditorías que aseguren la objetividad y la imparcialidad del proceso de auditoría.\nh) Asegurar que los resultados de las auditorías se informen a la dirección pertinente.\ni) Retener información documentada como evidencia del programa (o programas) de auditoría y de los resultados de las auditorías.",
+    "retrieved_context": [
+      {
+        "document": "Manual_SGSI_v2.pdf",
+        "content": "Sección 9.2: La organización realizará auditorías internas periódicamente para verificar el cumplimiento del SGSI."
+      },
+      {
+        "document": "Plan_Operativo_Anual_2025.pdf",
+        "content": "Cronograma de actividades 2025: Se programó una revisión interna de archivos en el mes de Septiembre a cargo del Administrador del SGSI."
+      }
+    ],
+    "expected_severity": "No conformidad mayor"
+  },
+  {
+    "clause_to_evaluate": "Clausula 9.3 - Revisión por la dirección\nLa alta dirección debe revisar el sistema de gestión de la seguridad de la información de la organización a intervalos planificados.\nRequisitos especificos:\na) Ejecutar revisiones a intervalos planificados por parte de la alta dirección.\nb) Incluir estados de acciones de revisiones previas y cambios en cuestiones externas/internas del apartado 4.1.\nc) Revisar la retroalimentación sobre el desempeño de seguridad (tendencias de no conformidades, monitoreo, auditorías y objetivos).\nd) Revisar la retroalimentación de las partes interesadas (4.2), resultados de evaluaciones de riesgo y estado de planes de tratamiento.\ne) Evaluar oportunidades de mejora continua y la necesidad de cambios en el SGSI.\nf) Incluir decisiones y salidas sobre oportunidades de mejora continua y retener evidencia documentada.",
+    "retrieved_context": [
+      {
+        "document": "Minuta_Comite_Direccion_Julio_2025.pdf",
+        "content": "La Alta Dirección se reunió el 15 de julio de 2025 para revisar el estado del SGSI. Se presentaron los cambios en el contexto interno/externo, la retroalimentación de clientes, el estado de los planes de tratamiento de riesgos y los objetivos de seguridad alcanzados. Sin embargo, debido a limitaciones de tiempo, la revisión de los resultados de la auditoría interna de mayo de 2025 y el estado de las acciones correctivas pendientes de 2024 se postergaron para la sesión del próximo año."
+      }
+    ],
+    "expected_severity": "No conformidad menor"
+  },
+  {
+    "clause_to_evaluate": "Clausula 5.2 - Política\nLa alta dirección debe establecer una política de seguridad de la información.\nRequisitos especificos:\na) Sea apropiada al propósito de la organización.\nb) Incluya objetivos de seguridad de la información o proporcione el marco para su establecimiento.\nc) Incluya un compromiso de cumplir con los requisitos aplicables relacionados con la seguridad de la información.\nd) Incluya un compromiso con la mejora continua del SGSI.\ne) Esté disponible como información documentada, se comunique dentro de la organización y esté disponible para las partes interesadas.",
+    "retrieved_context": [
+      {
+        "document": "Politica_Seguridad_Informacion_v3.pdf",
+        "content": "Nuestra política establece el marco para los objetivos de seguridad, es apropiada para la organización y declara explícitamente nuestro firme compromiso con el cumplimiento de los requisitos legales y contractuales aplicables, así como con la mejora continua de nuestro SGSI."
+      },
+      {
+        "document": "Evidencia_Induccion_RH_2025.xlsx",
+        "content": "Registro de firmas de nuevos ingresos donde se valida que conocen la existencia de la Política de Seguridad Corporativa."
+      }
+    ],
+    "expected_severity": "No conformidad menor"
+  },
+  {
+    "clause_to_evaluate": "Clausula 4.2 - Comprensión de las necesidades y expectativas de las partes interesadas\nLa organización debe determinar las partes interesadas pertinentes y sus requisitos relacionados con la seguridad de la información.\nRequisitos especificos:\na) Determinación de las partes interesadas que son pertinentes para el SGSI.\nb) Determinación de los requisitos de estas partes interesadas pertinentes para la seguridad de la información (ej. requisitos legales, regulatorios o contractuales).",
+    "retrieved_context": [
+      {
+        "document": "Matriz_Partes_Interesadas_2025.xlsx",
+        "content": "Registro formal que identifica como partes interesadas pertinentes a: Clientes, Entidades Reguladoras de Datos, Proveedores de Cloud y Empleados. Para cada uno se listan sus requisitos específicos: Acuerdos de Nivel de Servicio (SLA), Ley Federal de Protección de Datos Personales, y políticas de confidencialidad en contratos."
+      },
+      {
+        "document": "Acta_Revision_Anual_Alcance.pdf",
+        "content": "Minuta firmada por el Oficial de Seguridad en enero de 2025 donde se revisaron, actualizaron y validaron las necesidades de las partes interesadas frente a los nuevos contratos regulatorios vigentes."
+      }
+    ],
+    "expected_severity": "Conforme"
+  },
+  {
+    "clause_to_evaluate": "Clausula 6.1.2 - Proceso de evaluación de riesgos de seguridad de la información\nRequisitos especificos:\na) Establecer y mantener criterios de riesgo de seguridad de la información, incluyendo criterios de aceptación y de ejecución de evaluaciones.\nb) Asegurar que las evaluaciones repetidas de riesgos produzcan resultados consistentes, válidos y comparables.\nc) Identificar los riesgos asociados con la pérdida de confidencialidad, integridad y disponibilidad de la información e identificar a los dueños del riesgo.\nd) Analizar los riesgos estimando las consecuencias potenciales, la probabilidad y determinar los niveles de riesgo.\ne) Evaluar los riesgos comparando los resultados del análisis con los criterios de riesgo establecidos y priorizar los riesgos analizados.\nf) Retener información documentada sobre el proceso de evaluación de riesgos.",
+    "retrieved_context": [
+      {
+        "document": "Procedimiento_Gestion_Riesgos_v1.2.pdf",
+        "content": "Define los criterios de aceptación del riesgo mediante una escala del 1 al 5 y la fórmula de impacto por probabilidad. Establece que las evaluaciones deben repetirse anualmente usando los mismos activos para garantizar comparabilidad."
+      },
+      {
+        "document": "Matriz_Evaluacion_Riesgos_Q2_2025.xlsx",
+        "content": "Informe que detalla la identificación de 24 riesgos que afectan la confidencialidad, integridad y disponibilidad del sistema central. Cada riesgo cuenta con su cálculo numérico asignado, priorización automática, y tiene identificado explícitamente a un Gerente de Área como Dueño del Riesgo."
+      }
+    ],
+    "expected_severity": "Conforme"
+  },
+  {
+    "clause_to_evaluate": "Clausula 4.4 - Sistema de gestión de la seguridad de la información\nLa organización debe establecer, implementar, mantener y mejorar continuamente un sistema de gestión de la seguridad de la información.\nRequisitos especificos:\na) Establecimiento e implementación del SGSI de acuerdo con los requisitos de la norma.\nb) Mantenimiento y mejora continua de los procesos del SGSI y sus interacciones.",
+    "retrieved_context": [
+      {
+        "document": "Borrador_Alcance_SGSI.docx",
+        "content": "Texto preliminar: La empresa buscará implementar un SGSI que proteja las operaciones principales. El alcance tentativo incluye las oficinas centrales, pero falta definir si las sucursales de soporte operativo entran en la certificación de este año."
+      }
+    ],
+    "expected_severity": "No se puede evaluar"
+  },
+  {
+    "clause_to_evaluate": "Clausula 7.5.1 - General\nDocumentar la información adecuada y necesaria requerida para el SGSI.",
+    "retrieved_context": [],
+    "expected_severity": "No se puede evaluar"
+  },
+  {
+    "clause_to_evaluate": "Clausula 5.1 - Liderazgo y compromiso\nLa alta dirección debe demostrar liderazgo y compromiso con respecto al sistema de gestión de la seguridad de la información.\nRequisitos especificos:\na) Asegurar que se establezcan la política y los objetivos de seguridad de la información y que sean compatibles con la dirección estratégica.\nb) Asegurar la integración de los requisitos del SGSI en los procesos de negocio de la organización.\nc) Asegurar que los recursos necesarios para el SGSI estén disponibles.\nd) Comunicar la importancia de una gestión de la seguridad de la información eficaz y del cumplimiento de los requisitos.\ne) Asegurar que el SGSI logre los resultados previstos.\nf) Dirigir y apoyar a las personas para contribuir a la eficacia del SGSI y promover la mejora continua.",
+    "retrieved_context": [
+      {
+        "document": "Presupuesto_Aprobado_SGSI_2025.pdf",
+        "content": "Asignación presupuestal firmada por el Director General para herramientas de seguridad y consultoría externa del SGSI."
+      },
+      {
+        "document": "Comunicado_CEO_Seguridad.eml",
+        "content": "Correo masivo enviado por el CEO a toda la compañía reforzando la importancia estratégica de cumplir con el SGSI para los objetivos del negocio."
+      },
+      {
+        "document": "Plan_Estrategico_Corporativo.pdf",
+        "content": "Sección de Gobernanza: Los objetivos del SGSI están alineados uno a uno con los objetivos de expansión digital de la empresa."
+      }
+    ],
+    "expected_severity": "Oportunidad de Mejora (OFI)"
+  },
+  {
+    "clause_to_evaluate": "Clausula 7.3 - Toma de conciencia\nLas personas que realizan trabajos bajo el control de la organización deben poseer toma de conciencia sobre los elementos clave.\nRequisitos especificos:\na) Asegurar que las personas conozcan la política de seguridad de la información.\nb) Asegurar que conozcan su contribución a la eficacia del SGSI, incluidos los beneficios de una mejora en el desempeño.\nc) Asegurar que comprendan las implicaciones de no cumplir con los requisitos del SGSI.",
+    "retrieved_context": [
+      {
+        "document": "Presentacion_Induccion_SGSI_2025.pptx",
+        "content": "Láminas informativas utilizadas para capacitar al personal. Incluye una sección detallada sobre la Política de Seguridad de la Información, el rol de cada empleado en la efectividad del sistema y las sanciones administrativas e implicaciones legales por el incumplimiento de las políticas."
+      },
+      {
+        "document": "Reporte_Plataforma_Capacitacion_2025.csv",
+        "content": "Registro digital que demuestra que el 98% del personal activo completó y aprobó el curso obligatorio de toma de conciencia de seguridad de la información."
+      }
+    ],
+    "expected_severity": "Oportunidad de Mejora (OFI)"
+  }
+]
