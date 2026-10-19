@@ -1,0 +1,21 @@
+{
+  "name": "iso27001-sast-pipeline-cdk",
+  "version": "0.1.0",
+  "bin": {
+    "app": "bin/app.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "cdk": "cdk"
+  },
+  "devDependencies": {
+    "aws-cdk": "^2.170.0",
+    "typescript": "~5.4.0",
+    "@types/node": "20.x"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.170.0",
+    "constructs": "^10.0.0"
+  }
+}
