@@ -1,0 +1,26 @@
+{
+  "name": "iso27001-platform-cdk",
+  "version": "0.1.0",
+  "bin": {
+    "app": "bin/app.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "cdk": "cdk",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "aws-cdk": "2.200.0",
+    "typescript": "~5.4.0",
+    "@types/node": "20.x",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.0",
+    "@types/jest": "^29.5.0"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "2.200.0",
+    "constructs": "^10.0.0",
+    "source-map-support": "^0.5.21"
+  }
+}
