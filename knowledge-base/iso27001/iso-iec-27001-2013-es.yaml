@@ -1,0 +1,1535 @@
+urn: urn:intuitem:risk:library:iso27001-2013:es
+locale: es
+ref_id: ISO/IEC 27001:2013
+name: Norma Internacional ISO/IEC 27001:2013
+description: "Tecnología de la información — Técnicas de seguridad — Sistemas de gestión de la seguridad de la información — Requisitos"
+copyright: See https://www.iso.org/standard/27001
+version: 1
+publication_date: 2024-07-04
+provider: ISO/IEC
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:doc-pol
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:iso27001-2013:es
+    ref_id: ISO/IEC 27001:2013
+    name: Norma Internacional ISO/IEC 27001:2013
+    description: "Tecnología de la información — Técnicas de seguridad — Sistemas de gestión de la seguridad de la información — Requisitos"
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:core
+      name: Núcleo
+      assessable: false
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:4
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:core
+      ref_id: '4'
+      name: 'Contexto de la organización '
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:4
+      ref_id: '4.1'
+      name: Comprensión de la organización y de su contexto
+      description: "La organización debe determinar las cuestiones externas e internas que son pertinentes para su propósito y que afectan a su capacidad para lograr los resultados previstos de su SGSI."
+      components:
+      - "a) Identificación y determinación explícita de las cuestiones externas pertinentes."
+      - "b) Identificación y determinación explícita de las cuestiones internas pertinentes."
+      - "c) Análisis del impacto de dichas cuestiones sobre la capacidad de lograr los resultados previstos del SGSI."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.CONTEXT
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:4
+      ref_id: '4.2'
+      name: Comprensión de las necesidades y expectativas de las partes interesadas
+      description: "La organización debe determinar las partes interesadas pertinentes y sus requisitos relacionados con la seguridad de la información."
+      components:
+      - "a) Determinación de las partes interesadas que son pertinentes para el SGSI."
+      - "b) Determinación de los requisitos de estas partes interesadas pertinentes para la seguridad de la información (ej. requisitos legales, regulatorios o contractuales)."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.CONTEXT
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:4
+      ref_id: '4.3'
+      name: Determinación del alcance del sistema de gestión de la seguridad de la información
+      description: "La organización debe determinar los límites y la aplicabilidad del sistema de gestión de la seguridad de la información para establecer su alcance."
+      components:
+      - "a) Consideración de las cuestiones externas e internas referidas en el apartado 4.1."
+      - "b) Consideración de los requisitos referidos en el apartado 4.2."
+      - "c) Consideración de las interfaces y dependencias entre las actividades realizadas por la organización y aquellas ejecutadas por otras organizaciones."
+      - "d) El alcance debe estar disponible y mantenerse como información documentada."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.SCOPE
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:4.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:4
+      ref_id: '4.4'
+      name: Sistema de gestión de la seguridad de la información
+      description: "La organización debe establecer, implementar, mantener y mejorar continuamente un sistema de gestión de la seguridad de la información."
+      components:
+      - "a) Establecimiento e implementación del SGSI de acuerdo con los requisitos de la norma."
+      - "b) Mantenimiento y mejora continua de los procesos del SGSI y sus interacciones."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.OVERVIEW
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:5
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:core
+      ref_id: '5'
+      name: Liderazgo
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:5
+      ref_id: '5.1'
+      name: Liderazgo y compromiso
+      description: "La alta dirección debe demostrar liderazgo y compromiso con respecto al sistema de gestión de la seguridad de la información."
+      components:
+      - "a) Asegurar que se establezcan la política y los objetivos de seguridad de la información y que sean compatibles con la dirección estratégica."
+      - "b) Asegurar la integración de los requisitos del SGSI en los procesos de negocio de la organización."
+      - "c) Asegurar que los recursos necesarios para el SGSI estén disponibles."
+      - "d) Comunicar la importancia de una gestión de la seguridad de la información eficaz y del cumplimiento de los requisitos."
+      - "e) Asegurar que el SGSI logre los resultados previstos."
+      - "f) Dirigir y apoyar a las personas para contribuir a la eficacia del SGSI y promover la mejora continua."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.OVERVIEW
+      - urn:intuitem:risk:function:doc-pol:DOC.CONTROLS
+      - urn:intuitem:risk:function:doc-pol:DOC.COM
+      - urn:intuitem:risk:function:doc-pol:DOC.AUDIT_PLAN
+      - urn:intuitem:risk:function:doc-pol:DOC.COMPETENCY
+      - urn:intuitem:risk:function:doc-pol:POL.MAIN
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:5
+      ref_id: '5.2'
+      name: ' Política'
+      description: "La alta dirección debe establecer una política de seguridad de la información."
+      components:
+      - "a) Sea apropiada al propósito de la organización."
+      - "b) Incluya objetivos de seguridad de la información o proporcione el marco para su establecimiento."
+      - "c) Incluya un compromiso de cumplir con los requisitos aplicables relacionados con la seguridad de la información."
+      - "d) Incluya un compromiso con la mejora continua del SGSI."
+      - "e) Esté disponible como información documentada, se comunique dentro de la organización y esté disponible para las partes interesadas."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.MAIN
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:5
+      ref_id: '5.3'
+      name: Roles, responsabilidades y autoridades organizacionales
+      description: "La alta dirección debe asegurarse de que las responsabilidades y autoridades para los roles pertinentes se asignen y comuniquen."
+      components:
+      - "a) Asignar responsabilidades para asegurar que el SGSI se conforma con los requisitos de esta Norma Internacional."
+      - "b) Asignar responsabilidades para informar sobre el desempeño del SGSI a la alta dirección."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.RACI
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:6
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:core
+      ref_id: '6'
+      name: Planificación
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:6.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:6
+      ref_id: '6.1'
+      name: Acciones para abordar riesgos y oportunidades
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:6.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:6.1
+      ref_id: 6.1.1
+      name: Generalidades (Acciones para abordar riesgos y oportunidades)
+      components:
+      - "a) Considerar las cuestiones del apartado 4.1 y los requisitos del apartado 4.2 para determinar riesgos y oportunidades."
+      - "b) Asegurar que el SGSI pueda lograr los resultados previstos, prevenir o reducir efectos no deseados y lograr la mejora continua."
+      - "c) Planificar las acciones para abordar estos riesgos y oportunidades."
+      - "d) Planificar la manera de integrar e implementar las acciones en los procesos del SGSI y evaluar su eficacia."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.RISK
+      - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:6.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:6.1
+      ref_id: 6.1.2
+      name: Proceso de evaluación de riesgos de seguridad de la información
+      components:
+      - "a) Establecer y mantener criterios de riesgo de seguridad de la información, incluyendo criterios de aceptación y de ejecución de evaluaciones."
+      - "b) Asegurar que las evaluaciones repetidas de riesgos produzcan resultados consistentes, válidos y comparables."
+      - "c) Identificar los riesgos asociados con la pérdida de confidencialidad, integridad y disponibilidad de la información e identificar a los dueños del riesgo."
+      - "d) Analizar los riesgos estimando las consecuencias potenciales, la probabilidad y determinar los niveles de riesgo."
+      - "e) Evaluar los riesgos comparando los resultados del análisis con los criterios de riesgo establecidos y priorizar los riesgos analizados."
+      - "f) Retener información documentada sobre el proceso de evaluación de riesgos."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.RISK
+      - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:6.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:6.1
+      ref_id: 6.1.3
+      name: Tratamiento de riesgos de seguridad de la información
+      components:
+      - "a) Seleccionar opciones de tratamiento de riesgos de seguridad de la información apropiadas, considerando los resultados del análisis."
+      - "b) Determinar todos los controles necesarios para implementar la opción o opciones seleccionadas de tratamiento de riesgos (pudiendo usar el Anexo A como referencia)."
+      - "c) Comparar los controles determinados con los del Anexo A para asegurar que no se haya omitido ningún control necesario."
+      - "d) Producir una Declaración de Aplicabilidad (SoA) que contenga los controles necesarios, las justificaciones de inclusión/exclusión y el estado de implementación."
+      - "e) Formular un plan de tratamiento de riesgos de seguridad de la información y obtener la aprobación de los dueños del riesgo para dicho plan y la aceptación de los riesgos residuales."
+      - "f) Retener información documentada sobre el proceso de tratamiento de riesgos."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.RISK
+      - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
+      - urn:intuitem:risk:function:doc-pol:DOC.SOA
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:6
+      ref_id: '6.2'
+      name: Objetivos de seguridad de la información y planificación para lograrlos
+      description: "La organización debe establecer objetivos medibles (si es posible) en las funciones y niveles pertinentes, coherentes con la política de seguridad."
+      components:
+      - "a) Tener en cuenta los requisitos de seguridad de la información y los resultados de la evaluación y tratamiento de riesgos."
+      - "b) Comunicar, actualizar y mantener los objetivos como información documentada."
+      - "c) Al planificar cómo lograrlos, determinar: qué se va a hacer, qué recursos se requerirán, quién será responsable, cuándo se completará y cómo se evaluarán los resultados."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.MAIN
+      - urn:intuitem:risk:function:doc-pol:DOC.SO_REGISTER
+      - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
+      - urn:intuitem:risk:function:doc-pol:DOC.MGMT_REVIEW
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:7
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:core
+      ref_id: '7'
+      name: ' Soporte'
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:7
+      ref_id: '7.1'
+      name: Recursos
+      description: Proporcionar los recursos adecuados para el establecimiento y mantenimiento del SGSI.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.RACI
+      - urn:intuitem:risk:function:doc-pol:DOC.COMPETENCY
+      - urn:intuitem:risk:function:doc-pol:DOC.CONTROLS
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:7
+      ref_id: '7.2'
+      name: Competencia
+      description: "La organización debe determinar la competencia necesaria de las personas que realizan trabajos bajo su control que afecten al desempeño de la seguridad de la información."
+      components:
+      - "a) Asegurar que estas personas sean competentes basándose en la educación, formación o experiencia adecuadas."
+      - "b) Cuando proceda, tomar acciones para adquirir la competencia necesaria y evaluar la eficacia de las acciones tomadas."
+      - "c) Retener información documentada apropiada como evidencia de la competencia."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.EDUC
+      - urn:intuitem:risk:function:doc-pol:DOC.EDUC_REGISTER
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:7.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:7
+      ref_id: '7.3'
+      name: Toma de conciencia
+      description: "Las personas que realizan trabajos bajo el control de la organización deben poseer toma de conciencia sobre los elementos clave."
+      components:
+      - "a) Asegurar que las personas conozcan la política de seguridad de la información."
+      - "b) Asegurar que conozcan su contribución a la eficacia del SGSI, incluidos los beneficios de una mejora en el desempeño."
+      - "c) Asegurar que comprendan las implicaciones de no cumplir con los requisitos del SGSI."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.EDUC
+      - urn:intuitem:risk:function:doc-pol:DOC.EDUC_REGISTER
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:7.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:7
+      ref_id: '7.4'
+      name: Comunicación
+      description: "La organización debe determinar las comunicaciones internas y externas pertinentes al SGSI."
+      components:
+      - "a) Definir explícitamente: qué comunicar, cuándo comunicar y con quién comunicar."
+      - "b) Definir explícitamente: quién debe comunicar y los procesos por los cuales se efectúa la comunicación."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.COM
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:7.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:7
+      ref_id: '7.5'
+      name: Información Documentada
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:7.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:7.5
+      ref_id: 7.5.1
+      name: General
+      description: Documentar la información adecuada y necesaria requerida para el SGSI.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.DOC_REGISTER
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:7.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:7.5
+      ref_id: 7.5.2
+      name: Creación y actualización de información documentada
+      description: "Al crear o actualizar información documentada, se debe asegurar el control de calidad."
+      components:
+      - "a) Asegurar la identificación y descripción apropiada (ej. título, fecha, autor o número de referencia)."
+      - "b) Asegurar el formato y soporte adecuado (ej. idioma, versión del software, gráficos, papel o digital)."
+      - "c) Asegurar la revisión y aprobación apropiada para confirmar su idoneidad y adecuación."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.DOC_REGISTER
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:7.5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:7.5
+      ref_id: 7.5.3
+      name: Control de la información documentada
+      description: "La información documentada requerida por el SGSI debe controlarse estrictamente."
+      components:
+      - "a) Asegurar que esté disponible y sea idónea para su uso, dónde y cuándo se necesite."
+      - "b) Asegurar que esté protegida adecuadamente (ej. contra pérdida de confidencialidad, uso indebido o alteración)."
+      - "c) Controlar la distribución, acceso, recuperación, uso, almacenamiento, preservación, control de cambios y retención/disposición final."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.DOC_REGISTER
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:8
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:core
+      ref_id: '8'
+      name: Operación
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:8.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:8
+      ref_id: '8.1'
+      name: Planificación y control operacional
+      description: "La organización debe planificar, implementar y controlar los procesos necesarios para cumplir con los requisitos y ejecutar las acciones de la cláusula 6.1."
+      components:
+      - "a) Mantener información documentada en la medida necesaria para tener confianza en que los procesos se han llevado a cabo según lo planificado."
+      - "b) Controlar los cambios planificados y revisar las consecuencias de los cambios no previstos, tomando acciones para mitigar efectos adversos."
+      - "c) Asegurar que los procesos externalizados estén debidamente controlados."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.RACI
+      - urn:intuitem:risk:function:doc-pol:DOC.PROC_REGISTER
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:8.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:8
+      ref_id: '8.2'
+      name: Evaluación de riesgos de seguridad de la información
+      description: Realizar evaluaciones de riesgo periódicas o ante cambios significativos.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.PROC_REGISTER
+      - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:8.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:8
+      ref_id: '8.3'
+      name: Tratamiento de riesgos de seguridad de la información
+      description: Implementar el plan de tratamiento de riesgos determinado.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.PROC_REGISTER
+      - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:9
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:core
+      ref_id: '9'
+      name: Evaluación del desempeño
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:9.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:9
+      ref_id: '9.1'
+      name: Seguimiento, medición, análisis y evaluación
+      description: "La organización debe evaluar el desempeño de la seguridad de la información y la eficacia del SGSI."
+      components:
+      - "a) Determinar qué necesita seguimiento y medición, incluyendo los procesos y controles de seguridad."
+      - "b) Determinar los métodos de seguimiento, medición, análisis y evaluación necesarios para asegurar resultados válidos."
+      - "c) Determinar cuándo se debe realizar el seguimiento y la medición, y cuándo se deben analizar y evaluar los resultados."
+      - "d) Retener información documentada apropiada como evidencia de los resultados del seguimiento y la medición."
+      - "e) Evaluar el desempeño de la seguridad de la información y la eficacia del SGSI."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.MONITOR
+      - urn:intuitem:risk:function:doc-pol:DOC.AUDIT_PLAN
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:9.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:9
+      ref_id: '9.2'
+      name: Auditoría interna
+      description: "La organización debe llevar a cabo auditorías internas a intervalos planificados para proporcionar información sobre el estado del SGSI."
+      components:
+      - "a) Se conforma con los requisitos propios de la organización para su sistema de gestión de la seguridad de la información."
+      - "b) Se conforma con los requisitos de esta Norma Internacional."
+      - "c) Se implementa y se mantiene eficazmente."
+      - "d) Planificar, establecer, implementar y mantener un programa de auditoría (o programas), que incluya la frecuencia, los métodos, las responsabilidades, los requisitos de planificación y la de elaboración de informes."
+      - "e) El programa (o programas) de auditoría debe tomar en consideración la importancia de los procesos involucrados y los resultados de las auditorías anteriores."
+      - "f) Definir los criterios de auditoría y el alcance para cada auditoría individual."
+      - "g) Seleccionar auditores y realizar auditorías que aseguren la objetividad y la imparcialidad del proceso de auditoría."
+      - "h) Asegurar que los resultados de las auditorías se informen a la dirección pertinente."
+      - "i) Retener información documentada como evidencia del programa (o programas) de auditoría y de los resultados de las auditorías."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.AUDIT
+      - urn:intuitem:risk:function:doc-pol:DOC.AUDIT_PLAN
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:9.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:9
+      ref_id: '9.3'
+      name: Revisión por la dirección
+      description: "La alta dirección debe revisar el sistema de gestión de la seguridad de la información de la organización a intervalos planificados."
+      components:
+      - "a) Ejecutar revisiones a intervalos planificados por parte de la alta dirección."
+      - "b) Incluir estados de acciones de revisiones previas y cambios en cuestiones externas/internas del apartado 4.1."
+      - "c) Revisar la retroalimentación sobre el desempeño de seguridad (tendencias de no conformidades, monitoreo, auditorías y objetivos)."
+      - "d) Revisar la retroalimentación de las partes interesadas (4.2), resultados de evaluaciones de riesgo y estado de planes de tratamiento."
+      - "e) Evaluar oportunidades de mejora continua y la necesidad de cambios en el SGSI."
+      - "f) Incluir decisiones y salidas sobre oportunidades de mejora continua y retener evidencia documentada."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.MAIN
+      - urn:intuitem:risk:function:doc-pol:DOC.MGMT_REVIEW
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:10
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:core
+      ref_id: '10'
+      name: Mejora
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:10.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:10
+      ref_id: '10.1'
+      name: No conformidad y acción correctiva
+      description: "Cuando ocurra una no conformidad, la organización debe reaccionar ante ella, gestionarla y corregirla."
+      components:
+      - "a) Reaccionar ante la no conformidad, tomar acciones para controlarla, corregirla y hacer frente a las consecuencias."
+      - "b) Evaluar la necesidad de acciones para eliminar las causas de la no conformidad mediante la revisión de la misma, determinación de causas y existencia de situaciones similares."
+      - "c) Implementar cualquier acción necesaria y revisar la eficacia de las acciones correctivas tomadas."
+      - "d) Realizar cambios en el SGSI si es necesario."
+      - "e) Retener información documentada como evidencia de la naturaleza de las no conformidades, acciones tomadas y resultados."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.MAIN
+      - urn:intuitem:risk:function:doc-pol:POL.INCIDENT
+      - urn:intuitem:risk:function:doc-pol:DOC.NC_LOG
+      - urn:intuitem:risk:function:doc-pol:DOC.PROC_REGISTER
+      - urn:intuitem:risk:function:doc-pol:DOC.RACI
+      - urn:intuitem:risk:function:doc-pol:DOC.MGMT_REVIEW
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:10.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:10
+      ref_id: '10.2'
+      name: Mejora continua
+      description: Mejorar continuamente la idoneidad, adecuación y eficacia del SGSI.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.MAIN
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      name: Anexo A
+      assessable: false
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.5
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.5
+      name: Políticas de seguridad de la información
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.5.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.5
+      ref_id: A.5.1
+      name: Orientación de la dirección para la seguridad de la información
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.5.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.5.1
+      ref_id: A.5.1.1
+      name: Políticas para la seguridad de la información
+      description: Conjunto de políticas de seguridad de la información definidas, aprobadas por la dirección, publicadas y comunicadas a empleados y partes externas relevantes.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.5.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.5.1
+      ref_id: A.5.1.2
+      name: Revisión de las políticas para la seguridad de la información
+      description: Las políticas para la seguridad de la información se deben revisar a intervalos planificados o si ocurren cambios significativos para asegurar su idoneidad, adecuación y eficacia continua.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.6
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.6
+      name: Organización de la seguridad de la información
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.6
+      ref_id: A.6.1
+      name: Organización interna
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.1
+      ref_id: A.6.1.1
+      name: Roles y responsabilidades para la seguridad de la información
+      description: Todas las responsabilidades de seguridad de la información deben ser definidas y asignadas.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.1
+      ref_id: A.6.1.2
+      name: Segregación de funciones
+      description: Las funciones en conflicto y las áreas de responsabilidad deben ser segregadas para reducir las oportunidades de modificación no autorizada o no intencionada, o el uso indebido de los activos de la organización.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.1
+      ref_id: A.6.1.3
+      name: Contacto con las autoridades
+      description: Se deben mantener contactos adecuados con las autoridades pertinentes.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.1
+      ref_id: A.6.1.4
+      name: Contacto con grupos de interés especial
+      description: Se deben mantener contactos adecuados con grupos de interés especial o foros especializados de seguridad y asociaciones profesionales.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.1
+      ref_id: A.6.1.5
+      name: Seguridad de la información en la gestión de proyectos
+      description: La seguridad de la información debe abordarse en la gestión de proyectos, independientemente del tipo de proyecto.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.6
+      ref_id: A.6.2
+      name: Dispositivos móviles y teletrabajo
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.2
+      ref_id: A.6.2.1
+      name: Política de dispositivos móviles
+      description: Se debe adoptar una política y medidas de seguridad de soporte para gestionar los riesgos introducidos por el uso de dispositivos móviles.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.2
+      ref_id: A.6.2.2
+      name: Teletrabajo
+      description: Se debe implementar una política y medidas de seguridad de soporte para proteger la información accedida, procesada o almacenada en los sitios de teletrabajo.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.7
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.7
+      name: Seguridad de los recursos humanos
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.7
+      ref_id: A.7.1
+      name: Antes del empleo
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.1
+      ref_id: A.7.1.1
+      name: Selección (Screening)
+      description: Las verificaciones de antecedentes de todos los candidatos al empleo se deben realizar de acuerdo con las leyes y reglamentos pertinentes.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.1
+      ref_id: A.7.1.2
+      name: Términos y condiciones del empleo
+      description: Los acuerdos contractuales con empleados y contratistas deben establecer sus responsabilidades y las de la organización para la seguridad de la información.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.7
+      ref_id: A.7.2
+      name: Durante el empleo
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.2
+      ref_id: A.7.2.1
+      name: Responsabilidades de la dirección
+      description: La dirección debe exigir a todos los empleados y contratistas aplicar la seguridad de la información de acuerdo con las políticas y procedimientos establecidos.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.2
+      ref_id: A.7.2.2
+      name: Concientización, educación y formación en seguridad de la información
+      description: Todos los empleados y contratistas relevantes deben recibir educación de concienciación y actualizaciones periódicas en las políticas y procedimientos organizacionales.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.2
+      ref_id: A.7.2.3
+      name: Proceso disciplinario
+      description: Debe haber un proceso disciplinario formal y comunicado para tomar medidas contra los empleados que hayan cometido una brecha de seguridad de la información.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.7
+      ref_id: A.7.3
+      name: Terminación o cambio de empleo
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.3
+      ref_id: A.7.3.1
+      name: Responsabilidades de terminación o cambio de empleo
+      description: Las responsabilidades y deberes de seguridad de la información que sigan siendo válidos después de la terminación o cambio de empleo deben ser definidos, comunicados y cumplidos de forma estricta.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.8
+      name: Gestión de activos
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8
+      ref_id: A.8.1
+      name: Responsabilidad por los activos
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.1
+      ref_id: A.8.1.1
+      name: Inventario de activos
+      description: Los activos asociados con la información y las instalaciones de procesamiento de información deben ser identificados y un inventario de estos activos debe ser elaborado y mantenido.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.1
+      ref_id: A.8.1.2
+      name: Propiedad de los activos
+      description: Los activos mantenidos en el inventario deben tener un propietario asignado de forma explícita.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.1
+      ref_id: A.8.1.3
+      name: Uso aceptable de los activos
+      description: Se deben identificar, documentar e implementar reglas para el uso aceptable de la información y de los activos asociados.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.1
+      ref_id: A.8.1.4
+      name: Devolución de activos
+      description: Todos los empleados y usuarios de partes externas deben devolver todos los activos de la organización en su posesión al terminar su empleo, contrato o acuerdo.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8
+      ref_id: A.8.2
+      name: Clasificación de la información
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.2
+      ref_id: A.8.2.1
+      name: Clasificación de información
+      description: La información debe ser clasificada en términos de requisitos legales, valor, criticidad y sensibilidad ante divulgación o modificación no autorizada.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.2
+      ref_id: A.8.2.2
+      name: Etiquetado de información
+      description: Se debe desarrollar e implementar un conjunto adecuado de procedimientos para el etiquetado de información de acuerdo con el esquema de clasificación adoptado.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.2
+      ref_id: A.8.2.3
+      name: Manejo de activos
+      description: Se deben desarrollar e implementar procedimientos para el manejo de activos de acuerdo con el esquema de clasificación de información.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8
+      ref_id: A.8.3
+      name: Manejo de soportes de almacenamiento
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.3
+      ref_id: A.8.3.1
+      name: Gestión de soportes extraíbles
+      description: Se deben implementar procedimientos para la gestión de soportes extraíbles de acuerdo con el esquema de clasificación.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.3
+      ref_id: A.8.3.2
+      name: Eliminación de soportes de almacenamiento
+      description: Los soportes de almacenamiento se deben eliminar de forma segura cuando ya no se requieran, utilizando procedimientos formales.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.3
+      ref_id: A.8.3.3
+      name: Transferencia física de soportes de almacenamiento
+      description: Los soportes de almacenamiento que contengan información deben ser protegidos contra acceso no autorizado, uso indebido o corrupción durante el transporte.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.9
+      name: Control de acceso
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9
+      ref_id: A.9.1
+      name: Requisitos de negocio para el control de acceso
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.1
+      ref_id: A.9.1.1
+      name: Política de control de acceso
+      description: Se debe establecer, documentar y revisar una política de control de acceso basada en los requisitos del negocio y de la seguridad de la información.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.1
+      ref_id: A.9.1.2
+      name: Acceso a redes y servicios de red
+      description: A los usuarios solo se les debe proporcionar acceso a la red y a los servicios de red para los que hayan sido específicamente autorizados.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9
+      ref_id: A.9.2
+      name: Gestión de acceso de usuarios
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2
+      ref_id: A.9.2.1
+      name: Registro y baja de usuarios
+      description: Se debe implementar un proceso formal de registro y baja de usuarios para permitir la asignación de derechos de acceso.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2
+      ref_id: A.9.2.2
+      name: Provisión de acceso de usuarios
+      description: Se debe implementar un proceso formal de provisión de acceso de usuarios para asignar o revocar derechos de acceso para todos los tipos de usuarios.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2
+      ref_id: A.9.2.3
+      name: Gestión de derechos de acceso privilegiados
+      description: La asignación y el uso de derechos de acceso privilegiados deben ser restringidos y controlados de forma estricta.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2
+      ref_id: A.9.2.4
+      name: Gestión de información secreta de autenticación de los usuarios
+      description: La asignación de información secreta de autenticación debe controlarse a través de un proceso de gestión formal.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2
+      ref_id: A.9.2.5
+      name: Revisión de los derechos de acceso de los usuarios
+      description: Los propietarios de activos deben revisar los derechos de acceso de los usuarios a intervalos regulares.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2
+      ref_id: A.9.2.6
+      name: Retirada o ajuste de los derechos de acceso
+      description: Los derechos de acceso de todos los empleados y usuarios externos deben eliminarse al terminar su empleo o ajustarse ante cambios.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9
+      ref_id: A.9.3
+      name: Responsabilidades del usuario
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.3
+      ref_id: A.9.3.1
+      name: Uso de información secreta de autenticación
+      description: Se debe exigir a los usuarios que sigan las prácticas de la organización en el uso de información secreta de autenticación.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9
+      ref_id: A.9.4
+      name: Control de acceso a sistemas y aplicaciones
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4
+      ref_id: A.9.4.1
+      name: Restricción de acceso a la información
+      description: El acceso a la información y a las funciones del sistema de aplicaciones debe restringirse de acuerdo con la política de control de acceso.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4
+      ref_id: A.9.4.2
+      name: Procedimientos seguros de inicio de sesión
+      description: Cuando lo requiera la política de control de acceso, el acceso a sistemas y aplicaciones debe controlarse mediante un procedimiento seguro de inicio de sesión.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4
+      ref_id: A.9.4.3
+      name: Sistema de gestión de contraseñas
+      description: Los sistemas de gestión de contraseñas deben ser interactivos y deben garantizar contraseñas de calidad.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4
+      ref_id: A.9.4.4
+      name: Uso de programas de utilidades con privilegios
+      description: El uso de programas de utilidad que puedan ser capaces de anular los controles del sistema y de las aplicaciones debe ser restringido y controlado de forma estricta.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4
+      ref_id: A.9.4.5
+      name: Control de acceso al código fuente de los programas
+      description: El acceso al código fuente de los programas debe estar restringido.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.10
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.10
+      name: Criptografía
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.10.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.10
+      ref_id: A.10.1
+      name: Controles criptográficos
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.10.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.10.1
+      ref_id: A.10.1.1
+      name: Política sobre el uso de controles criptográficos
+      description: Se debe desarrollar e implementar una política sobre el uso de controles criptográficos para la protección de la información.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.10.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.10.1
+      ref_id: A.10.1.2
+      name: Gestión de claves
+      description: Se debe desarrollar e implementar una política sobre el uso, protección y ciclo de vida de las claves criptográficas.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.11
+      name: Seguridad física y ambiental
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11
+      ref_id: A.11.1
+      name: Áreas seguras
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1
+      ref_id: A.11.1.1
+      name: Perímetro de seguridad física
+      description: Se deben definir y utilizar perímetros de seguridad para proteger las áreas que contengan información confidencial o crítica e instalaciones de procesamiento de información.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1
+      ref_id: A.11.1.2
+      name: Controles físicos de entrada
+      description: Las áreas seguras deben estar protegidas por controles de entrada adecuados para asegurar que solo se permita el acceso al personal autorizado.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1
+      ref_id: A.11.1.3
+      name: Seguridad de oficinas, despachos e instalaciones
+      description: Se debe diseñar y aplicar la seguridad física para oficinas, despachos e instalaciones.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1
+      ref_id: A.11.1.4
+      name: Protección contra amenazas externas y ambientales
+      description: Se debe diseñar y aplicar protección física contra desastres naturales, ataques maliciosos o accidentes.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1
+      ref_id: A.11.1.5
+      name: Trabajo en áreas seguras
+      description: Se deben diseñar y aplicar procedimientos para el trabajo en áreas seguras.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1
+      ref_id: A.11.1.6
+      name: Áreas de carga y descarga y de entrega
+      description: Los puntos de acceso tales como áreas de entrega y carga deben ser controlados y, si es posible, aislados de las instalaciones de procesamiento de información.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11
+      ref_id: A.11.2
+      name: Seguridad de los equipos
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2
+      ref_id: A.11.2.1
+      name: Emplazamiento y protección de equipos
+      description: Los equipos deben ser ubicados y protegidos para reducir los riesgos de amenazas y peligros ambientales, y las oportunidades de acceso no autorizado.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2
+      ref_id: A.11.2.2
+      name: Suministro de energía y servicios de soporte
+      description: Los equipos deben estar protegidos contra fallos de energía y otras interrupciones causadas por fallos en los servicios de soporte.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2
+      ref_id: A.11.2.3
+      name: Seguridad del cableado
+      description: El cableado de energía y de telecomunicaciones que transporta datos o soporta servicios de información debe estar protegido contra la intercepción, interferencia o daño.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2
+      ref_id: A.11.2.4
+      name: Mantenimiento de equipos
+      description: Los equipos deben recibir un mantenimiento correcto para asegurar su disponibilidad e integridad continua.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2
+      ref_id: A.11.2.5
+      name: Retirada de activos
+      description: Los equipos, información o software no deben ser retirados fuera de la organización sin autorización previa.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2
+      ref_id: A.11.2.6
+      name: Seguridad de los equipos y activos fuera de las instalaciones
+      description: Se debe aplicar seguridad a los activos fuera de las instalaciones, teniendo en cuenta los diferentes riesgos de trabajar fuera de las dependencias de la organización.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2
+      ref_id: A.11.2.7
+      name: Eliminación segura o reutilización de equipos
+      description: Todos los elementos de los equipos que contengan medios de almacenamiento deben ser verificados para asegurar que cualquier dato confidencial haya sido eliminado o sobrescrito antes de su eliminación o reutilización.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2
+      ref_id: A.11.2.8
+      name: Equipos de usuario desatendidos
+      description: Los usuarios deben asegurarse de que los equipos desatendidos tengan la protección adecuada.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2
+      ref_id: A.11.2.9
+      name: Política de escritorio limpio y pantalla limpia
+      description: Se debe adoptar una política de escritorio limpio para los papeles y soportes de almacenamiento extraíbles, y una política de pantalla limpia para las instalaciones de procesamiento de información.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.12
+      name: Seguridad de las operaciones
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12
+      ref_id: A.12.1
+      name: Procedimientos y responsabilidades operacionales
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.1
+      ref_id: A.12.1.1
+      name: Procedimientos operativos documentados
+      description: Los procedimientos operativos deben ser documentados y ponerse a disposición de todos los usuarios que los necesiten.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.1
+      ref_id: A.12.1.2
+      name: Gestión de cambios
+      description: Se deben controlar los cambios en la organización, en los procesos de negocio, en las instalaciones y en los sistemas de procesamiento de información que afecten a la seguridad de la información.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.1
+      ref_id: A.12.1.3
+      name: Gestión de la capacidad
+      description: El uso de los recursos se debe supervisar y ajustar, y se deben hacer proyecciones de los requisitos de capacidad futuros para asegurar el desempeño requerido del sistema.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.1
+      ref_id: A.12.1.4
+      name: Separación de los entornos de desarrollo, prueba y operación
+      description: Los entornos de desarrollo, prueba y operación deben estar separados para reducir los riesgos de acceso o cambios no autorizados al entorno operativo.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12
+      ref_id: A.12.2
+      name: Protección contra el software malicioso (Malware)
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.2
+      ref_id: A.12.2.1
+      name: Controles contra el software malicioso
+      description: Se deben implementar controles de detección, prevención y recuperación para proteger contra el software malicioso, combinados con una concientización adecuada del usuario.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12
+      ref_id: A.12.3
+      name: Copias de seguridad (Backup)
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.3
+      ref_id: A.12.3.1
+      name: Copias de seguridad de la información
+      description: Se deben realizar copias de seguridad de la información, el software y las imágenes del sistema, y probarlas regularmente de acuerdo con una política de copias de seguridad acordada.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12
+      ref_id: A.12.4
+      name: Registro de eventos y supervisión (Logging and monitoring)
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.4
+      ref_id: A.12.4.1
+      name: Registro de eventos
+      description: Se deben producir, conservar y revisar regularmente registros de eventos que graben las actividades del usuario, excepciones, fallos y eventos de seguridad de la información.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.4
+      ref_id: A.12.4.2
+      name: Protección de la información de los registros
+      description: Las instalaciones de registro y la información de los registros deben estar protegidas contra la manipulación and el acceso no autorizado.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.4
+      ref_id: A.12.4.3
+      name: Registros del administrador y del operador
+      description: Las actividades del administrador del sistema y del operador del sistema deben registrarse, y los registros protegerse y revisarse regularmente.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.4
+      ref_id: A.12.4.4
+      name: Sincronización del reloj
+      description: Los relojes de todos los sistemas de procesamiento de información relevantes dentro de una organización o dominio de seguridad deben estar sincronizados con una única fuente de tiempo de referencia.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12
+      ref_id: A.12.5
+      name: Control del software operativo
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.5
+      ref_id: A.12.5.1
+      name: Instalación de software en sistemas operativos
+      description: Se deben implementar procedimientos para controlar la instalación de software en los sistemas operativos.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12
+      ref_id: A.12.6
+      name: Gestión de vulnerabilidades técnicas
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.6
+      ref_id: A.12.6.1
+      name: Gestión de vulnerabilidades técnicas
+      description: Se debe obtener oportunamente información sobre las vulnerabilidades técnicas de los sistemas de información en uso, evaluar la exposición de la organización y tomar las medidas adecuadas.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.6.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.6
+      ref_id: A.12.6.2
+      name: Restricciones en la instalación de software
+      description: Se deben establecer e implementar reglas que regulen la instalación de software por parte de los usuarios.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12
+      ref_id: A.12.7
+      name: Consideraciones sobre las auditorías de los sistemas de información
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.7
+      ref_id: A.12.7.1
+      name: Controles de auditoría de los sistemas de información
+      description: Los requisitos de auditoría y las actividades que impliquen la verificación de los sistemas operativos deben planificarse y acordarse cuidadosamente para minimizar las interrupciones.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.13
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.13
+      name: Seguridad de las comunicaciones
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13
+      ref_id: A.13.1
+      name: Gestión de la seguridad de las redes
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.1
+      ref_id: A.13.1.1
+      name: Controles de redes
+      description: Las redes deben gestionarse y controlarse para proteger la información en los sistemas y aplicaciones.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.1
+      ref_id: A.13.1.2
+      name: Seguridad de los servicios de red
+      description: Se deben identificar e incluir en los acuerdos de servicios de red los mecanismos de seguridad, niveles de servicio y requisitos de gestión de todos los servicios de red.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.1
+      ref_id: A.13.1.3
+      name: Segregación en redes
+      description: Los grupos de servicios de información, usuarios y sistemas de información deben estar segregados en las redes.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13
+      ref_id: A.13.2
+      name: Transferencia de información
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.2
+      ref_id: A.13.2.1
+      name: Políticas y procedimientos de transferencia de información
+      description: Debe haber políticas, procedimientos y controles formales de transferencia para proteger la transferencia de información mediante el uso de todo tipo de instalaciones de comunicación.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.2
+      ref_id: A.13.2.2
+      name: Acuerdos sobre transferencia de información
+      description: Los acuerdos deben abordar la transferencia segura de información comercial entre la organización y las partes externas.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.2
+      ref_id: A.13.2.3
+      name: Mensajería electrónica
+      description: La información involucrada en la mensajería electrónica debe estar protegida de forma adecuada.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.2
+      ref_id: A.13.2.4
+      name: Acuerdos de confidencialidad o de no divulgación
+      description: Se deben identificar, revisar regularmente y documentar los requisitos para los acuerdos de confidencialidad o no divulgación que reflejen las necesidades de la organización.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.14
+      name: Adquisición, desarrollo y mantenimiento de sistemas
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14
+      ref_id: A.14.1
+      name: Requisitos de seguridad de los sistemas de información
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.1
+      ref_id: A.14.1.1
+      name: Análisis y especificación de los requisitos de seguridad de la información
+      description: Los requisitos relacionados con la seguridad de la información deben incluirse en los requisitos para nuevos sistemas de información o mejoras a los existentes.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.1
+      ref_id: A.14.1.2
+      name: Seguridad de los servicios de aplicaciones en redes públicas
+      description: La información involucrada en los servicios de aplicaciones que pasan por redes públicas debe protegerse contra actividades fraudulentas, disputas contractuales y divulgación no autorizada.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.1
+      ref_id: A.14.1.3
+      name: Protección de las transacciones de los servicios de aplicaciones
+      description: La información involucrada en las transacciones de servicios de aplicaciones debe protegerse para evitar transmisiones incompletas, desvíos, alteraciones o divulgaciones no autorizadas.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14
+      ref_id: A.14.2
+      name: Seguridad en los procesos de desarrollo y soporte
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2
+      ref_id: A.14.2.1
+      name: Política de desarrollo seguro
+      description: Se deben establecer y aplicar reglas para el desarrollo de software y sistemas a los desarrollos dentro de la organización.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2
+      ref_id: A.14.2.2
+      name: Procedimientos de control de cambios en los sistemas
+      description: Los cambios en los sistemas dentro del ciclo de vida del desarrollo deben controlarse mediante el uso de procedimientos formales de control de cambios.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2
+      ref_id: A.14.2.3
+      name: Revisión técnica de las aplicaciones tras cambios en la plataforma operativa
+      description: Cuando cambien las plataformas operativas, las aplicaciones críticas para el negocio deben revisarse y probarse para garantizar que no haya un impacto adverso.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2
+      ref_id: A.14.2.4
+      name: Restricciones a las modificaciones de los paquetes de software
+      description: Se deben desalentar las modificaciones a los paquetes de software, limitarse a los cambios necesarios y todos los cambios deben ser estrictamente controlados.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2
+      ref_id: A.14.2.5
+      name: Principios de ingeniería de sistemas seguros
+      description: Se deben establecer, documentar, mantener y aplicar principios para la ingeniería de sistemas seguros a cualquier esfuerzo de implementación de sistemas de información.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2
+      ref_id: A.14.2.6
+      name: Entorno de desarrollo seguro
+      description: Las organizaciones deben establecer y proteger adecuadamente entornos de desarrollo seguros para los esfuerzos de desarrollo e integración de sistemas.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2
+      ref_id: A.14.2.7
+      name: Desarrollo externalizado (Outsourced development)
+      description: La organización debe supervisar y monitorear la actividad del desarrollo de sistemas externalizado.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2
+      ref_id: A.14.2.8
+      name: Pruebas de seguridad de los sistemas
+      description: Las pruebas de la funcionalidad de seguridad deben llevarse a cabo durante el desarrollo.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2
+      ref_id: A.14.2.9
+      name: Pruebas de aceptación del sistema
+      description: Se deben establecer programas de pruebas de aceptación y criterios relacionados para los nuevos sistemas de información, actualizaciones y nuevas versiones.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14
+      ref_id: A.14.3
+      name: Datos de prueba
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.3
+      ref_id: A.14.3.1
+      name: Protección de los datos de prueba
+      description: Los datos de prueba deben seleccionarse cuidadosamente, protegerse y controlarse.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.15
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.15
+      name: Relaciones con los proveedores
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.15
+      ref_id: A.15.1
+      name: Seguridad de la información en las relaciones con los proveedores
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.1
+      ref_id: A.15.1.1
+      name: Política de seguridad de la información para las relaciones con los proveedores
+      description: Los requisitos de seguridad de la información para mitigar los riesgos asociados con el acceso de los proveedores a los activos de la organización deben acordarse y documentarse.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.1
+      ref_id: A.15.1.2
+      name: Abordar la seguridad dentro de los acuerdos con los proveedores
+      description: Se deben establecer y acordar todos los requisitos de seguridad pertinentes con cada proveedor que pueda acceder, procesar, almacenar o proporcionar componentes de infraestructura de TI.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.1
+      ref_id: A.15.1.3
+      name: Cadena de suministro de tecnología de la información y comunicaciones
+      description: Los acuerdos con los proveedores deben incluir requisitos para abordar los riesgos de seguridad de la información asociados con la cadena de suministro de productos y servicios de TIC.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.15
+      ref_id: A.15.2
+      name: Gestión de la entrega de servicios del proveedor
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.2
+      ref_id: A.15.2.1
+      name: Supervisión y revisión de los servicios del proveedor
+      description: Las organizaciones deben supervisar, revisar y auditar regularmente la entrega de servicios por parte de los proveedores.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.2
+      ref_id: A.15.2.2
+      name: Gestión de cambios en los servicios del proveedor
+      description: Los cambios en la prestación de servicios por parte de los proveedores se deben gestionar teniendo en cuenta la criticidad de la información comercial y la reevaluación de riesgos.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.16
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.16
+      name: Gestión de incidentes de seguridad de la información
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16
+      ref_id: A.16.1
+      name: Gestión de incidentes y mejoras de seguridad de la información
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1
+      ref_id: A.16.1.1
+      name: Responsabilidades y procedimientos
+      description: Se deben establecer responsabilidades y procedimientos de gestión para asegurar una respuesta rápida, eficaz y ordenada a los incidentes de seguridad de la información.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1
+      ref_id: A.16.1.2
+      name: Notificación de eventos de seguridad de la información
+      description: Los eventos de seguridad de la información deben notified a través de los canales de gestión adecuados lo más rápido posible.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1
+      ref_id: A.16.1.3
+      name: Notificación de debilidades de seguridad de la información
+      description: Se debe exigir a los empleados y contratistas que utilicen los sistemas que observen y notifiquen cualquier debilidad sospechosa en los sistemas o servicios.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1
+      ref_id: A.16.1.4
+      name: Evaluación de eventos de seguridad de la información y decisiones
+      description: Los eventos de seguridad de la información deben evaluarse y decidirse si se clasificarán como incidentes de seguridad de la información.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1
+      ref_id: A.16.1.5
+      name: Respuesta a incidentes de seguridad de la información
+      description: Los incidentes de seguridad de la información deben responderse de acuerdo con los procedimientos documentados.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1
+      ref_id: A.16.1.6
+      name: Aprendizaje de los incidentes de seguridad de la información
+      description: El conocimiento adquirido mediante el análisis y resolución de incidentes de seguridad debe utilizarse para reducir la probabilidad o el impacto de incidentes futuros.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1
+      ref_id: A.16.1.7
+      name: Recopilación de evidencias
+      description: La organización debe definir y aplicar procedimientos para la identificación, recopilación, adquisición y preservación de información que pueda servir como evidencia.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.17
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.17
+      name: Aspectos de seguridad de la información para la gestión de la continuidad del negocio
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.17.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.17
+      ref_id: A.17.1
+      name: Continuidad de la seguridad de la información
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.17.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.17.1
+      ref_id: A.17.1.1
+      name: Planificación de la continuidad de la seguridad de la información
+      description: La organización debe determinar sus requisitos para la seguridad de la información y la continuidad de la gestión en situaciones adversas, por ejemplo, durante una crisis o desastre.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.17.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.17.1
+      ref_id: A.17.1.2
+      name: Implementación de la continuidad de la seguridad de la información
+      description: La organización debe establecer, documentar, implementar y mantener procesos, procedimientos y controles para garantizar el nivel requerido de continuidad de la seguridad de la información.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.17.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.17.1
+      ref_id: A.17.1.3
+      name: Verificar, revisar y evaluar la continuidad de la seguridad de la información
+      description: La organización debe verificar los controles de continuidad de la seguridad de la información establecidos e implementados a intervalos regulares para garantizar su validez y eficacia.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.17.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.17
+      ref_id: A.17.2
+      name: Redundancias
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.17.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.17.2
+      ref_id: A.17.2.1
+      name: Disponibilidad de las instalaciones de procesamiento de información
+      description: Las instalaciones de procesamiento de información deben implementarse con redundancia suficiente para cumplir con los requisitos de disponibilidad.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.18
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.18
+      name: Cumplimiento (Compliance)
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18
+      ref_id: A.18.1
+      name: Cumplimiento de los requisitos legales y contractuales
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1
+      ref_id: A.18.1.1
+      name: Identificación de la legislación aplicable y de los requisitos contractuales
+      description: Todos los requisitos legislativos, estatutarios, reglamentarios y contractuales relevantes deben identificarse explícitamente, documentarse y mantenerse actualizados.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1
+      ref_id: A.18.1.2
+      name: Derechos de propiedad intelectual (DPI)
+      description: Se deben implementar procedimientos adecuados para garantizar el cumplimiento de los requisitos legales, reglamentarios y contractuales relacionados con los derechos de propiedad intelectual.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1
+      ref_id: A.18.1.3
+      name: Protección de registros organizacionales
+      description: Los registros deben protegerse contra pérdida, destrucción, falsificación, acceso no autorizado y divulgación no autorizada, de acuerdo con los requisitos.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1
+      ref_id: A.18.1.4
+      name: Privacidad y protección de la información de identificación personal (PII)
+      description: Se debe garantizar la privacidad y la protección de la información de identificación personal tal como se requiere en la legislación y reglamentación pertinente, cuando corresponda.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1
+      ref_id: A.18.1.5
+      name: Regulación de los controles criptográficos
+      description: Los controles criptográficos se deben utilizar de conformidad con todos los acuerdos, leyes y reglamentos pertinentes.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18
+      ref_id: A.18.2
+      name: Revisiones de la seguridad de la información
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.2
+      ref_id: A.18.2.1
+      name: Revisión independiente de la seguridad de la información
+      description: El enfoque de la organización para gestionar la seguridad de la información y su implementación debe revisarse de forma independiente a intervalos planificados o ante cambios significativos.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.2
+      ref_id: A.18.2.2
+      name: Cumplimiento con las políticas y normas de seguridad
+      description: Los directores deben revisar regularmente el cumplimiento del procesamiento de la información y los procedimientos dentro de su área de responsabilidad.
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.2
+      ref_id: A.18.2.3
+      name: Revisión del cumplimiento técnico
+      description: Los sistemas de información deben revisarse regularmente para comprobar el cumplimiento de las políticas y normas de seguridad de la información de la organización.
