@@ -1,0 +1,8 @@
+agents:
+  PlanningAgent:
+    entrypoint: src.main:app
+    memory:
+      mode: NO_MEMORY  # Switch to STM_ONLY after initial successful deployment
+      # memory_id: <set-after-creation>
+      # memory_name: PlanningAgentMemory
+      # event_expiry_days: 30
