@@ -1,0 +1,8 @@
+boto3>=1.35.0
+jupyterlab
+numpy
+pandas
+langchain-aws>=0.2.0
+langchain-core>=0.3.0
+langgraph>=0.2.0
+strands-agents>=1.0.0
