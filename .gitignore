@@ -1,0 +1,12 @@
+# Local ennvironments
+.venv
+.kiro
+CLAUDE.local.md
+CLAUDE.md
+.env
+*checkpoint*
+*pyc*
+
+
+# MacOS files
+.DS_Store
