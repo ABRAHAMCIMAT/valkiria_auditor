@@ -1,0 +1,8 @@
+agents:
+  ConsolidationAgent:
+    entrypoint: src.main:app
+    memory:
+      mode: NO_MEMORY  # Switch to STM_AND_LTM after initial deployment
+      # memory_id: <set-after-creation>
+      # memory_name: ConsolidationAgentMemory
+      # event_expiry_days: 90
