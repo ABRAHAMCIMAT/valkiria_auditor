@@ -1,0 +1,309 @@
+{
+  "projectKey": "acme-corp:iso27001-webapp",
+  "projectName": "ACME Corp - Portal de Gestion SGSI",
+  "analysisDate": "2025-06-20T14:32:00-0600",
+  "version": "2.4.1",
+  "qualityGate": "FAILED",
+  "summary": {
+    "bugs": 12,
+    "vulnerabilities": 18,
+    "code_smells": 45,
+    "security_hotspots": 8,
+    "coverage": 42.3,
+    "duplications": 8.7,
+    "lines_of_code": 24500
+  },
+  "issues": [
+    {
+      "key": "VULN-001",
+      "type": "VULNERABILITY",
+      "severity": "CRITICAL",
+      "component": "src/auth/login.py",
+      "line": 45,
+      "message": "SQL Injection vulnerability: user input concatenated directly into query string without parameterization",
+      "rule": "python:S3649",
+      "effort": "30min",
+      "tags": ["cwe-89", "owasp-a03", "sans-top25-insecure"],
+      "iso_control_reference": "A.8.26"
+    },
+    {
+      "key": "VULN-002",
+      "type": "VULNERABILITY",
+      "severity": "CRITICAL",
+      "component": "src/api/users.py",
+      "line": 112,
+      "message": "Hardcoded credentials found: database password stored in source code",
+      "rule": "python:S2068",
+      "effort": "15min",
+      "tags": ["cwe-798", "owasp-a07"],
+      "iso_control_reference": "A.8.4"
+    },
+    {
+      "key": "VULN-003",
+      "type": "VULNERABILITY",
+      "severity": "HIGH",
+      "component": "src/crypto/encryption.py",
+      "line": 23,
+      "message": "Use of weak cryptographic algorithm: MD5 used for password hashing instead of bcrypt/argon2",
+      "rule": "python:S4790",
+      "effort": "2h",
+      "tags": ["cwe-327", "owasp-a02"],
+      "iso_control_reference": "A.8.24"
+    },
+    {
+      "key": "VULN-004",
+      "type": "VULNERABILITY",
+      "severity": "HIGH",
+      "component": "src/api/documents.py",
+      "line": 78,
+      "message": "Path traversal vulnerability: file path constructed from user input without sanitization",
+      "rule": "python:S2083",
+      "effort": "45min",
+      "tags": ["cwe-22", "owasp-a01"],
+      "iso_control_reference": "A.8.26"
+    },
+    {
+      "key": "VULN-005",
+      "type": "VULNERABILITY",
+      "severity": "HIGH",
+      "component": "src/auth/session.py",
+      "line": 34,
+      "message": "Session token generated using weak random number generator (random.randint instead of secrets module)",
+      "rule": "python:S2245",
+      "effort": "20min",
+      "tags": ["cwe-330", "owasp-a02"],
+      "iso_control_reference": "A.8.24"
+    },
+    {
+      "key": "VULN-006",
+      "type": "VULNERABILITY",
+      "severity": "HIGH",
+      "component": "src/api/export.py",
+      "line": 56,
+      "message": "Server-Side Request Forgery: URL parameter passed directly to requests.get() without validation",
+      "rule": "python:S5144",
+      "effort": "1h",
+      "tags": ["cwe-918", "owasp-a10"],
+      "iso_control_reference": "A.8.26"
+    },
+    {
+      "key": "VULN-007",
+      "type": "VULNERABILITY",
+      "severity": "MEDIUM",
+      "component": "src/middleware/cors.py",
+      "line": 12,
+      "message": "CORS policy allows all origins (Access-Control-Allow-Origin: *) in production configuration",
+      "rule": "python:S5122",
+      "effort": "30min",
+      "tags": ["cwe-942", "owasp-a05"],
+      "iso_control_reference": "A.8.26"
+    },
+    {
+      "key": "VULN-008",
+      "type": "VULNERABILITY",
+      "severity": "MEDIUM",
+      "component": "src/logging/audit_log.py",
+      "line": 89,
+      "message": "Sensitive data written to log: user email and IP address logged without masking",
+      "rule": "python:S5332",
+      "effort": "45min",
+      "tags": ["cwe-532", "owasp-a09"],
+      "iso_control_reference": "A.8.15"
+    },
+    {
+      "key": "VULN-009",
+      "type": "VULNERABILITY",
+      "severity": "MEDIUM",
+      "component": "src/auth/mfa.py",
+      "line": 67,
+      "message": "TOTP verification allows unlimited retry attempts without rate limiting or lockout",
+      "rule": "python:S5693",
+      "effort": "2h",
+      "tags": ["cwe-307", "owasp-a07"],
+      "iso_control_reference": "A.8.5"
+    },
+    {
+      "key": "VULN-010",
+      "type": "VULNERABILITY",
+      "severity": "MEDIUM",
+      "component": "src/api/upload.py",
+      "line": 23,
+      "message": "Unrestricted file upload: no validation of file content type or extension",
+      "rule": "python:S2598",
+      "effort": "1h",
+      "tags": ["cwe-434", "owasp-a04"],
+      "iso_control_reference": "A.8.26"
+    },
+    {
+      "key": "VULN-011",
+      "type": "VULNERABILITY",
+      "severity": "LOW",
+      "component": "src/templates/base.html",
+      "line": 15,
+      "message": "Missing Content-Security-Policy header in response",
+      "rule": "web:S5728",
+      "effort": "1h",
+      "tags": ["cwe-693", "owasp-a05"],
+      "iso_control_reference": "A.8.26"
+    },
+    {
+      "key": "VULN-012",
+      "type": "VULNERABILITY",
+      "severity": "LOW",
+      "component": "src/config/settings.py",
+      "line": 8,
+      "message": "Debug mode enabled in production configuration (DEBUG=True)",
+      "rule": "python:S4507",
+      "effort": "5min",
+      "tags": ["cwe-489", "owasp-a05"],
+      "iso_control_reference": "A.8.9"
+    },
+    {
+      "key": "VULN-013",
+      "type": "VULNERABILITY",
+      "severity": "MEDIUM",
+      "component": "src/api/reports.py",
+      "line": 134,
+      "message": "Cross-Site Scripting (XSS): user input rendered in template without escaping",
+      "rule": "python:S5131",
+      "effort": "30min",
+      "tags": ["cwe-79", "owasp-a03"],
+      "iso_control_reference": "A.8.26"
+    },
+    {
+      "key": "VULN-014",
+      "type": "VULNERABILITY",
+      "severity": "HIGH",
+      "component": "src/backup/export.py",
+      "line": 45,
+      "message": "Insecure temporary file creation: using predictable file names in /tmp without restricted permissions",
+      "rule": "python:S5445",
+      "effort": "30min",
+      "tags": ["cwe-377", "owasp-a01"],
+      "iso_control_reference": "A.8.10"
+    },
+    {
+      "key": "VULN-015",
+      "type": "VULNERABILITY",
+      "severity": "MEDIUM",
+      "component": "src/api/middleware.py",
+      "line": 28,
+      "message": "Missing authentication check on administrative endpoint /api/admin/config",
+      "rule": "python:S3330",
+      "effort": "1h",
+      "tags": ["cwe-306", "owasp-a01"],
+      "iso_control_reference": "A.8.3"
+    },
+    {
+      "key": "VULN-016",
+      "type": "VULNERABILITY",
+      "severity": "LOW",
+      "component": "src/utils/http.py",
+      "line": 19,
+      "message": "TLS certificate verification disabled (verify=False) in HTTP client",
+      "rule": "python:S4830",
+      "effort": "15min",
+      "tags": ["cwe-295", "owasp-a07"],
+      "iso_control_reference": "A.8.24"
+    },
+    {
+      "key": "VULN-017",
+      "type": "VULNERABILITY",
+      "severity": "HIGH",
+      "component": "src/auth/jwt_handler.py",
+      "line": 31,
+      "message": "JWT token signed with 'none' algorithm accepted, allowing token forgery",
+      "rule": "python:S5659",
+      "effort": "1h",
+      "tags": ["cwe-347", "owasp-a02"],
+      "iso_control_reference": "A.8.5"
+    },
+    {
+      "key": "VULN-018",
+      "type": "VULNERABILITY",
+      "severity": "MEDIUM",
+      "component": "src/models/user.py",
+      "line": 56,
+      "message": "Insufficient password complexity: minimum length set to 4 characters without complexity requirements",
+      "rule": "python:S2245",
+      "effort": "30min",
+      "tags": ["cwe-521", "owasp-a07"],
+      "iso_control_reference": "A.8.5"
+    }
+  ],
+  "security_hotspots": [
+    {
+      "key": "HS-001",
+      "message": "Review this regular expression for ReDoS vulnerability",
+      "component": "src/validators/input.py",
+      "line": 34,
+      "status": "TO_REVIEW",
+      "vulnerability_probability": "MEDIUM"
+    },
+    {
+      "key": "HS-002",
+      "message": "Ensure that disabling CSRF protection is safe here",
+      "component": "src/api/webhooks.py",
+      "line": 8,
+      "status": "TO_REVIEW",
+      "vulnerability_probability": "HIGH"
+    },
+    {
+      "key": "HS-003",
+      "message": "Review permissions for this file operation",
+      "component": "src/storage/local.py",
+      "line": 45,
+      "status": "TO_REVIEW",
+      "vulnerability_probability": "LOW"
+    },
+    {
+      "key": "HS-004",
+      "message": "Ensure this HTTP endpoint requires authentication",
+      "component": "src/api/health.py",
+      "line": 12,
+      "status": "REVIEWED",
+      "vulnerability_probability": "LOW"
+    },
+    {
+      "key": "HS-005",
+      "message": "Review this cryptographic operation for proper key management",
+      "component": "src/crypto/keys.py",
+      "line": 28,
+      "status": "TO_REVIEW",
+      "vulnerability_probability": "HIGH"
+    },
+    {
+      "key": "HS-006",
+      "message": "Verify that sensitive data is not exposed in error messages",
+      "component": "src/api/error_handler.py",
+      "line": 15,
+      "status": "TO_REVIEW",
+      "vulnerability_probability": "MEDIUM"
+    },
+    {
+      "key": "HS-007",
+      "message": "Ensure logging does not capture sensitive authentication tokens",
+      "component": "src/middleware/request_logger.py",
+      "line": 42,
+      "status": "TO_REVIEW",
+      "vulnerability_probability": "MEDIUM"
+    },
+    {
+      "key": "HS-008",
+      "message": "Review deserialization of untrusted data using pickle",
+      "component": "src/cache/serializer.py",
+      "line": 19,
+      "status": "TO_REVIEW",
+      "vulnerability_probability": "HIGH"
+    }
+  ],
+  "metrics": {
+    "reliability_rating": "C",
+    "security_rating": "E",
+    "maintainability_rating": "B",
+    "security_review_rating": "D",
+    "ncloc": 24500,
+    "complexity": 312,
+    "cognitive_complexity": 478
+  }
+}
