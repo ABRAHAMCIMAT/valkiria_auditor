@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Multi-agent ISO 27001 audit system using RAG (Retrieval-Augmented Generation). Built as a graduate capstone project (ITESM MNA, Team #16). The system ingests a curated knowledge base of ISO standards, real audit reports, and organizational policies to generate ISMS audit findings and reports.
+Multi-agent ISO 27001 audit system using RAG (Retrieval-Augmented Generation). Built as a graduate capstone project (MNA, Team #16). The system ingests a curated knowledge base of ISO standards, real audit reports, and organizational policies to generate ISMS audit findings and reports.
 
 **Development language:** Python 3.14+ with Jupyter notebooks. Documentation and deliverables are in Spanish.
 
