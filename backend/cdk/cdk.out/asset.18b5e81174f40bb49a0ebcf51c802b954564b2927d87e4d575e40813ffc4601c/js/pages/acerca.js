@@ -82,7 +82,7 @@ const AcercaPage = {
           <h2 id="about-team" class="about-section__title">Equipo</h2>
           <p class="about-section__text" style="margin-bottom:1rem;">
             Proyecto integrador desarrollado como parte del programa de Maestría en Inteligencia Artificial 
-            Aplicada del Tecnológico de Monterrey.
+            Aplicada.
           </p>
           <div class="team-grid">
             <div class="team-member">
