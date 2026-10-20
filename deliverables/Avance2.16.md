@@ -1,7 +1,5 @@
 <!-- Page 1 -->
 
-INSTITUTO TECNOLÓGICO Y DE ESTUDIOS
-SUPERIORES DE MONTERREY
 Maestría en Inteligencia Artificial Aplicada (MNA)
 Proyecto Integrador
 Sistema multi-agente de auditoría (ISO 27001)
