@@ -14,8 +14,8 @@ ___
 1. Clonar el repositorio localmente.
 
 ```bash
-git clone https://github.com/UCdavidUC/mna-proyecto-integrador-e16
-cd mna-proyecto-integrador-e16
+git clone https://github.com/ABRAHAMCIMAT/valkiria_auditor
+cd valkiria_auditor
 
 ```
 * **Nota**: Para poder acceder al código a través de la línea de comando de Git será necesario acceder a su cuenta git a través de la siguiente guía [Git](https://git-scm.com/book/es/v2/Inicio---Sobre-el-Control-de-Versiones-Configurando-Git-por-primera-vez).
@@ -50,7 +50,7 @@ jupyter lab
 ## Estructura del Repositorio
 
 ```
-mna-proyecto-integrador-e16/
+valkiria_auditor/
 │
 ├── deliverables/
 │   ├── Avance1/
