@@ -1,0 +1,42 @@
+name: upload-missing-files
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download project ZIP from Google Drive
+        run: |
+          curl -sL -o /tmp/proyecto.zip "https://drive.usercontent.google.com/download?id=1zaZ_tKULJxkqqEJz7tJTEGBgsjCohDIK&export=download&confirm=t&uuid=5c9f548d-9342-4da0-920a-10aa2e06af01"
+
+      - name: Extract ZIP
+        run: |
+          mkdir -p /tmp/extract
+          unzip -q /tmp/proyecto.zip -d /tmp/extract
+
+      - name: Copy project files into repo
+        run: |
+          ROOT=$(find /tmp/extract -maxdepth 1 -mindepth 1 -type d | head -1)
+          cd "$ROOT"
+          find . -type d \( -name node_modules -o -name __MACOSX \) -prune -o -type f -print | while read -r f; do
+            case "$f" in
+              *.pyc) continue ;;
+            esac
+            mkdir -p "$GITHUB_WORKSPACE/$(dirname "$f")"
+            cp "$f" "$GITHUB_WORKSPACE/$f"
+          done
+
+      - name: Commit and push
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          git config user.name "Lindy"
+          git config user.email "lindy@lindymail.ai"
+          git add -A
+          git commit -m "Agregar archivos binarios y diagramas faltantes" || echo "Nothing to commit"
+          git push
