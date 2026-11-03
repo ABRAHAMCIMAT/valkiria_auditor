@@ -35,7 +35,7 @@ Output:
             "avg_sources_per_query": 4.3,
             "knowledge_base_id": "...",
             "embedding_model": "amazon.titan-embed-text-v2:0",
-            "generation_model": "amazon.nova-pro-v1:0"
+            "generation_model": "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
         }
     }
 
@@ -61,11 +61,11 @@ VALIDATION_PREFIX = os.environ.get("VALIDATION_PREFIX", "validation/")
 REGION            = os.environ.get("AWS_REGION", "us-east-1")
 
 # Generation model for RetrieveAndGenerate
-# amazon.nova-pro-v1:0 — latest Amazon Nova Pro, strong reasoning + multimodal
-# Alternative: us.anthropic.claude-3-5-sonnet-20241022-v2:0 (cross-region inference profile)
+# Claude Sonnet 4.5 runs through a cross-region inference profile
 GENERATION_MODEL_ID = os.environ.get(
-    "GENERATION_MODEL_ID", "amazon.nova-pro-v1:0"
+    "GENERATION_MODEL_ID", "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
 )
+AWS_ACCOUNT_ID = os.environ.get("AWS_ACCOUNT_ID", "")
 
 # Embedding model (must match what was used during KB creation)
 EMBEDDING_MODEL_ID = os.environ.get(
@@ -130,7 +130,7 @@ def _retrieve_and_generate(kb_id: str, question: str) -> dict:
             "knowledgeBaseConfiguration": {
                 "knowledgeBaseId": kb_id,
                 "modelArn": (
-                    f"arn:aws:bedrock:{REGION}::foundation-model/{GENERATION_MODEL_ID}"
+                    f"arn:aws:bedrock:{REGION}:{AWS_ACCOUNT_ID}:inference-profile/{GENERATION_MODEL_ID}"
                 ),
                 "retrievalConfiguration": {
                     "vectorSearchConfiguration": {
@@ -155,7 +155,6 @@ def _retrieve_and_generate(kb_id: str, question: str) -> dict:
                         "textInferenceConfig": {
                             "maxTokens": 1024,
                             "temperature": 0.0,   # deterministic for audit responses
-                            "topP": 0.9,
                         }
                     },
                 },

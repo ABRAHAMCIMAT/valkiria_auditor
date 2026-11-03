@@ -46,7 +46,7 @@ Usuario/API Gateway
 ### 3.1 Planning Agent (Planificación)
 
 **Directorio:** `planning_agent/`  
-**Modelo:** GPT OSS 120B (temperature=0.2)  
+**Modelo:** Claude Sonnet 4.5 (temperature=0.2)  
 **Función:** Genera planes de auditoría estructurados conforme ISO 19011:2018.
 
 **Herramientas:**
@@ -61,7 +61,7 @@ Usuario/API Gateway
 ### 3.2 Evidence Agent (Recopilación de Evidencia)
 
 **Directorio:** `evidence_agent/`  
-**Modelo:** Nova Pro (temperature=0.1)  
+**Modelo:** Claude Sonnet 4.5 (temperature=0.1)  
 **Función:** Recupera y evalúa la suficiencia de evidencia documental.
 
 **Herramientas:**
@@ -78,7 +78,7 @@ Usuario/API Gateway
 ### 3.3 Organizational Controls Agent (A.5)
 
 **Directorio:** `organizational_controls_agent/`  
-**Modelo:** Nova Pro (temperature=0.0 — determinístico)  
+**Modelo:** Claude Sonnet 4.5 (temperature=0.0 — determinístico)  
 **Función:** Evalúa 37 controles organizacionales.
 
 **Herramientas:**
@@ -94,7 +94,7 @@ Usuario/API Gateway
 ### 3.4 People Controls Agent (A.6)
 
 **Directorio:** `people_controls_agent/`  
-**Modelo:** Nova Pro (temperature=0.0)  
+**Modelo:** Claude Sonnet 4.5 (temperature=0.0)  
 **Función:** Evalúa 8 controles de personas.
 
 **Herramientas:**
@@ -110,7 +110,7 @@ Usuario/API Gateway
 ### 3.5 Physical Controls Agent (A.7)
 
 **Directorio:** `physical_controls_agent/`  
-**Modelo:** Nova Pro (temperature=0.0)  
+**Modelo:** Claude Sonnet 4.5 (temperature=0.0)  
 **Función:** Evalúa 14 controles físicos y ambientales.
 
 **Herramientas:**
@@ -127,7 +127,7 @@ Usuario/API Gateway
 ### 3.6 Technological Controls Agent (A.8)
 
 **Directorio:** `technological_controls_agent/`  
-**Modelo:** Nova Pro (temperature=0.0)  
+**Modelo:** Claude Sonnet 4.5 (temperature=0.0)  
 **Función:** Evalúa 34 controles tecnológicos.
 
 **Herramientas:**
@@ -145,7 +145,7 @@ Usuario/API Gateway
 ### 3.7 Consolidation Agent (Orchestrator)
 
 **Directorio:** `consolidation_agent/`  
-**Modelo:** Nova Pro (temperature=0.0, max_tokens=8192)  
+**Modelo:** Claude Sonnet 4.5 (temperature=0.0, max_tokens=8192)  
 **Función:** Coordina todos los sub-agentes y produce el reporte final consolidado.
 
 **Herramientas:**
@@ -169,7 +169,7 @@ Usuario/API Gateway
 ### 4.1 Cargador de Modelos (`model_loader.py`)
 
 Centraliza la configuración de modelos Bedrock. Parámetros configurables vía variables de entorno:
-- `MODEL_ID`: ID del modelo (default: `us.amazon.nova-pro-v1:0`)
+- `MODEL_ID`: ID del modelo (default: `us.anthropic.claude-sonnet-4-5-20250929-v1:0`)
 - `MODEL_TEMPERATURE`: Temperatura de muestreo (default: 0.2)
 - `MODEL_MAX_TOKENS`: Tokens máximos (default: 4096)
 - `MODEL_TOP_P`: Top-P (default: 0.9)
@@ -221,9 +221,9 @@ La cuenta necesita acceso habilitado en Bedrock a los modelos asignados y el Kno
 python backend/agentcore/preflight.py --knowledge-base-id <KB_ID>
 ```
 
-Comprueba credenciales, acceso a modelos, **invocación de herramientas en cada modelo** y el Knowledge Base. El orquestador usa Claude Sonnet 4.5, que depende de la invocación de herramientas. Para cambiar de modelo usa `-c orchestratorModelId=<id>`.
+Comprueba credenciales, acceso al modelo, **invocación de herramientas** y el Knowledge Base. Todos los agentes usan Claude Sonnet 4.5 por su perfil de inferencia. Para cambiar de modelo usa `-c modelId=<id>`.
 
-Claude Sonnet 4.5 está deprecado: su retiro en la API de Claude es el 30 de noviembre de 2026. Bedrock define su propio calendario, así que hay que confirmarlo antes de desplegar.
+Claude Sonnet 4.5 está en estado *Legacy* en Bedrock: confirma su fecha de retiro en la ficha del modelo antes de desplegar.
 
 ### 5.3 Despliegue completo
 

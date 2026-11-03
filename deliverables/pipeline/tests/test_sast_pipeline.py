@@ -69,7 +69,7 @@ def aws(monkeypatch):
             "AWS_DEFAULT_REGION": "us-east-1", "AUDITS_TABLE": "Audits",
             "BUCKET_NAME": "source", "UPLOAD_KEY": "uploads/application.zip",
             "RESULTS_BUCKET": "results", "EVALUATION_PREFIX": "agent-evaluations/",
-            "GENERATION_MODEL_ID": "us.amazon.nova-pro-v1:0", "SOURCE_BUCKET": "source",
+            "GENERATION_MODEL_ID": "us.anthropic.claude-sonnet-4-5-20250929-v1:0", "SOURCE_BUCKET": "source",
             "SOURCE_KEY": "uploads/application.zip", "KB_ID": "",
         }.items():
             monkeypatch.setenv(key, value)

@@ -29,7 +29,7 @@ aws s3 sync build/datasets s3://<bucket>/fine-tuning/datasets
 python launch_training.py --agent controls_a7 --role-arn <arn> --train-s3 s3://<bucket>/fine-tuning/datasets
 
 # 5. Comparar contra la Fase 1 sobre el conjunto de evaluación
-MODEL_ID=us.amazon.nova-pro-v1:0 python evaluate_model.py --out baseline.jsonl
+MODEL_ID=us.anthropic.claude-sonnet-4-5-20250929-v1:0 python evaluate_model.py --out baseline.jsonl
 SAGEMAKER_ENDPOINT_NAME=<endpoint> python evaluate_model.py --out adapter.jsonl
 python promotion_gate.py --baseline baseline.jsonl --candidate adapter.jsonl
 ```

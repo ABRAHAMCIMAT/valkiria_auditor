@@ -14,7 +14,7 @@ This directory contains the Bedrock AgentCore implementation for the multi-agent
                            │
 ┌──────────────────────────▼───────────────────────────────────────────────┐
 │                    consolidation_agent (Orchestrator)                     │
-│   Model: us.amazon.nova-pro-v1:0 │ Temp: 0.0 │ Memory: STM + LTM       │
+│   Model: Claude Sonnet 4.5       │ Temp: 0.0 │ Memory: STM + LTM       │
 │   Coordinates all sub-agents, verifies consistency, generates report     │
 └───┬──────────┬──────────┬──────────┬──────────┬─────────────────────────┘
     │          │          │          │          │
@@ -37,12 +37,12 @@ This directory contains the Bedrock AgentCore implementation for the multi-agent
 
 | # | Agent | Directory | Model | Role |
 |---|-------|-----------|-------|------|
-| 1 | Planificación | `planning_agent/` | Nova Pro | Generate audit plan: scope, schedule, criteria, team |
-| 2 | Recopilación de Evidencia | `evidence_agent/` | Nova Pro | Retrieve and organize documentary evidence via RAG |
-| 3 | Controles Organizacionales | `organizational_controls_agent/` | Nova Pro | Evaluate 37 controls (A.5.x) |
-| 4 | Controles de Personas | `people_controls_agent/` | Nova Pro | Evaluate 8 controls (A.6.x) |
-| 5 | Controles Físicos | `physical_controls_agent/` | Nova Pro | Evaluate 14 controls (A.7.x) |
-| 6 | Controles Tecnológicos | `technological_controls_agent/` | Nova Pro | Evaluate 34 controls (A.8.x) |
+| 1 | Planificación | `planning_agent/` | Claude Sonnet 4.5 | Generate audit plan: scope, schedule, criteria, team |
+| 2 | Recopilación de Evidencia | `evidence_agent/` | Claude Sonnet 4.5 | Retrieve and organize documentary evidence via RAG |
+| 3 | Controles Organizacionales | `organizational_controls_agent/` | Claude Sonnet 4.5 | Evaluate 37 controls (A.5.x) |
+| 4 | Controles de Personas | `people_controls_agent/` | Claude Sonnet 4.5 | Evaluate 8 controls (A.6.x) |
+| 5 | Controles Físicos | `physical_controls_agent/` | Claude Sonnet 4.5 | Evaluate 14 controls (A.7.x) |
+| 6 | Controles Tecnológicos | `technological_controls_agent/` | Claude Sonnet 4.5 | Evaluate 34 controls (A.8.x) |
 | 7 | Consolidación | `consolidation_agent/` | Claude Sonnet 4.5 | Orchestrate, verify, consolidate final audit report |
 
 ## Shared Components

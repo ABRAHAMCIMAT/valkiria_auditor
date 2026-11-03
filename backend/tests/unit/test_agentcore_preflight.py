@@ -53,3 +53,40 @@ class TestModelLoader:
     def test_other_models_keep_top_p(self, monkeypatch):
         config = self._config(monkeypatch, "us.amazon.nova-pro-v1:0")
         assert config["top_p"] == 0.9
+
+
+class TestModelArn:
+    def test_cross_region_id_uses_inference_profile(self, monkeypatch):
+        from shared import bedrock_arn
+
+        monkeypatch.setattr(bedrock_arn, "_account_id", lambda: "111111111111")
+        arn = bedrock_arn.model_arn("us.anthropic.claude-sonnet-4-5-20250929-v1:0", "us-east-1")
+        assert arn == (
+            "arn:aws:bedrock:us-east-1:111111111111:inference-profile/"
+            "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+        )
+
+    def test_regional_id_uses_foundation_model(self):
+        from shared import bedrock_arn
+
+        arn = bedrock_arn.model_arn("amazon.titan-embed-text-v2:0", "us-east-1")
+        assert arn == "arn:aws:bedrock:us-east-1::foundation-model/amazon.titan-embed-text-v2:0"
+
+
+class TestOnlyClaudeInRuntimeDefaults:
+    def test_rag_requests_do_not_send_top_p(self):
+        source = (Path(__file__).resolve().parents[2] / "agentcore" / "shared" / "tools" / "rag_tools.py").read_text()
+        assert "topP" not in source
+
+    def test_model_defaults_are_sonnet(self):
+        backend = Path(__file__).resolve().parents[2]
+        for relative in ("strandsagents", "langgraph", "crewai"):
+            source = (backend / relative / "orchestrator.py").read_text()
+            assert "gpt-oss" not in source and "qwen" not in source
+
+    def test_recommendations_use_only_sonnet(self):
+        from backend.models.registry import BEDROCK_MODELS, get_recommended_models_for_agent
+
+        for role in ("planning", "evidence", "organizational", "people", "technological", "consolidation"):
+            assert get_recommended_models_for_agent(role) == ["claude-sonnet-4.5"]
+        assert "claude-sonnet-4.5" in BEDROCK_MODELS

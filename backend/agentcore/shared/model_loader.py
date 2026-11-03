@@ -10,7 +10,7 @@ from strands.models.bedrock import BedrockModel
 
 
 # Default model configuration
-DEFAULT_MODEL_ID = "openai.gpt-oss-120b-1:0"
+DEFAULT_MODEL_ID = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
 DEFAULT_REGION = "us-east-1"
 DEFAULT_TEMPERATURE = 0.2  # Deterministic for audit outputs
 DEFAULT_MAX_TOKENS = 4096
@@ -28,7 +28,7 @@ def load_model(
     SageMaker endpoint named by SAGEMAKER_ENDPOINT_NAME when set (Phase 2).
 
     Args:
-        model_id: Bedrock model ARN or ID. Defaults to Nova Pro.
+        model_id: Bedrock model ARN or ID. Defaults to Claude Sonnet 4.5.
         temperature: Sampling temperature. Defaults to 0.2 for deterministic outputs.
         max_tokens: Max tokens in response. Defaults to 4096.
         region: AWS region. Defaults to env var or us-east-1.

@@ -127,7 +127,7 @@ aws codepipeline get-pipeline-state --name iso27001-sast-pipeline
 |----------|-------------|
 | `RESULTS_BUCKET` | Bucket S3 para resultados |
 | `EVALUATION_PREFIX` | Prefijo para evaluaciones del agente (`agent-evaluations/`) |
-| `GENERATION_MODEL_ID` | Modelo Bedrock para generación (`us.amazon.nova-pro-v1:0`) |
+| `GENERATION_MODEL_ID` | Modelo Bedrock para generación (`us.anthropic.claude-sonnet-4-5-20250929-v1:0`) |
 | `KB_ID` | ID del Knowledge Base de Bedrock (ISO 27001) |
 | `SOURCE_BUCKET`, `SOURCE_KEY` | Objeto subido, para leer sus metadatos |
 | `AUDITS_TABLE` | Tabla con el estado de las evaluaciones |
@@ -155,7 +155,7 @@ aws codepipeline get-pipeline-state --name iso27001-sast-pipeline
 ### Evaluación del Agente (ISO 27001 mapping)
 ```json
 {
-  "metadata": { "model": "us.amazon.nova-pro-v1:0", "knowledge_base_id": "..." },
+  "metadata": { "model": "us.anthropic.claude-sonnet-4-5-20250929-v1:0", "knowledge_base_id": "..." },
   "evaluation": {
     "summary": {
       "compliance_score": 72,

@@ -372,7 +372,7 @@ export class SastPipelineStack extends cdk.Stack {
       environment: {
         RESULTS_BUCKET: resultsBucket.bucketName,
         EVALUATION_PREFIX: 'agent-evaluations/',
-        GENERATION_MODEL_ID: 'us.amazon.nova-pro-v1:0',
+        GENERATION_MODEL_ID: 'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
         KB_ID: knowledgeBaseId,
         SOURCE_BUCKET: sourceBucket.bucketName,
         SOURCE_KEY: UPLOAD_KEY,

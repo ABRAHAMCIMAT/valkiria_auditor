@@ -210,8 +210,8 @@ export class BackendStack extends cdk.Stack {
       METRICS_TABLE: metricsTable.tableName,
       FINDINGS_TABLE: findingsTable.tableName,
       METRICS_PREFIX: 'metrics/',
-      PRIMARY_MODEL_ID: 'openai.gpt-oss-120b-1:0',
-      FAST_MODEL_ID: 'qwen.qwen3-32b-v1:0',
+      PRIMARY_MODEL_ID: 'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
+      FAST_MODEL_ID: 'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
       KNOWLEDGE_BASE_ID: this.node.tryGetContext('knowledgeBaseId') || '',
       AUDITS_TABLE: props.auditsTable.tableName,
       LOG_LEVEL: 'INFO',
@@ -278,7 +278,6 @@ export class BackendStack extends cdk.Stack {
       environment: {
         ...commonEnv,
         FRAMEWORK: 'comp2013',
-        PRIMARY_MODEL_ID: 'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
         JUDGE_MODEL_ID: 'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
         VECTOR_STORE_BUCKET: 'iso27001-vectors-e16',
         VECTOR_STORE_INDEX: 'iso27001-compliance-index',

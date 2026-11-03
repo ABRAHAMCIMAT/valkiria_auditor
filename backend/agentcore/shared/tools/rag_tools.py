@@ -8,10 +8,12 @@ import os
 import boto3
 from strands import tool
 
+from shared.bedrock_arn import model_arn
+
 
 REGION = os.environ.get("AWS_REGION", "us-east-1")
 KNOWLEDGE_BASE_ID = os.environ.get("KNOWLEDGE_BASE_ID", "")
-GENERATION_MODEL_ID = os.environ.get("GENERATION_MODEL_ID", "openai.gpt-oss-120b-1:0")
+GENERATION_MODEL_ID = os.environ.get("GENERATION_MODEL_ID", "us.anthropic.claude-sonnet-4-5-20250929-v1:0")
 NUMBER_OF_RESULTS = int(os.environ.get("RAG_NUMBER_OF_RESULTS", "5"))
 
 bedrock_agent_runtime = boto3.client("bedrock-agent-runtime", region_name=REGION)
@@ -42,7 +44,7 @@ def query_knowledge_base(question: str, num_results: int = 5) -> dict:
             "type": "KNOWLEDGE_BASE",
             "knowledgeBaseConfiguration": {
                 "knowledgeBaseId": kb_id,
-                "modelArn": f"arn:aws:bedrock:{REGION}::foundation-model/{GENERATION_MODEL_ID}",
+                "modelArn": model_arn(GENERATION_MODEL_ID, REGION),
                 "retrievalConfiguration": {
                     "vectorSearchConfiguration": {
                         "numberOfResults": num_results,
@@ -54,7 +56,6 @@ def query_knowledge_base(question: str, num_results: int = 5) -> dict:
                         "textInferenceConfig": {
                             "maxTokens": 2048,
                             "temperature": 0.0,
-                            "topP": 0.9,
                         }
                     },
                 },
@@ -114,7 +115,7 @@ def retrieve_control_evidence(control_id: str, organization_context: str = "") -
             "type": "KNOWLEDGE_BASE",
             "knowledgeBaseConfiguration": {
                 "knowledgeBaseId": kb_id,
-                "modelArn": f"arn:aws:bedrock:{REGION}::foundation-model/{GENERATION_MODEL_ID}",
+                "modelArn": model_arn(GENERATION_MODEL_ID, REGION),
                 "retrievalConfiguration": {
                     "vectorSearchConfiguration": {
                         "numberOfResults": NUMBER_OF_RESULTS,
@@ -136,7 +137,6 @@ def retrieve_control_evidence(control_id: str, organization_context: str = "") -
                         "textInferenceConfig": {
                             "maxTokens": 2048,
                             "temperature": 0.0,
-                            "topP": 0.9,
                         }
                     },
                 },

@@ -41,17 +41,17 @@ Specialized agents coordinated by a consolidator follow the "Agents as Tools" pa
 
 | # | Agent | Model (API) | Model (Fine-tuned) | Role |
 |---|-------|-------------|--------------------|----- |
-| 1 | Planificación | Nova Pro | Ministral 3 8B | Generate audit plan: scope, schedule, criteria, team |
-| 2 | Recopilación de Evidencia | Nova Pro | Ministral 3 8B | Retrieve and organize relevant documentary evidence |
-| 3 | Controles Organizacionales (A.5) | Nova Pro | Ministral 3 8B | Evaluate 37 organizational controls |
-| 4 | Controles de Personas (A.6) | Nova Pro | Ministral 3 8B | Evaluate 8 people controls |
-| 5 | Controles Físicos (A.7) | Nova Pro | Ministral 3 8B | Evaluate 14 physical and environmental controls |
-| 6 | Controles Tecnológicos (A.8) | Nova Pro | Ministral 3 8B | Evaluate 34 technological controls |
+| 1 | Planificación | Claude Sonnet 4.5 (vía Bedrock) | Ministral 3 8B | Generate audit plan: scope, schedule, criteria, team |
+| 2 | Recopilación de Evidencia | Claude Sonnet 4.5 (vía Bedrock) | Ministral 3 8B | Retrieve and organize relevant documentary evidence |
+| 3 | Controles Organizacionales (A.5) | Claude Sonnet 4.5 (vía Bedrock) | Ministral 3 8B | Evaluate 37 organizational controls |
+| 4 | Controles de Personas (A.6) | Claude Sonnet 4.5 (vía Bedrock) | Ministral 3 8B | Evaluate 8 people controls |
+| 5 | Controles Físicos (A.7) | Claude Sonnet 4.5 (vía Bedrock) | Ministral 3 8B | Evaluate 14 physical and environmental controls |
+| 6 | Controles Tecnológicos (A.8) | Claude Sonnet 4.5 (vía Bedrock) | Ministral 3 8B | Evaluate 34 technological controls |
 | 7 | Consolidación (Orchestrator) | Claude Sonnet 4.5 (vía Bedrock) | DeepSeek-R1-0528-Qwen3-8B | Verify consistency, consolidate, generate final report |
 
 ### AWS Services
 
-- **Amazon Bedrock** — Foundation models: Nova Pro (parsing/generation), Titan Text Embeddings V2 (embeddings)
+- **Amazon Bedrock** — Foundation models: Claude Sonnet 4.5 (parsing/generation), Titan Text Embeddings V2 (embeddings)
 - **Bedrock Knowledge Bases** — Managed RAG with semantic chunking and metadata filtering
 - **S3 Vectors** — Vector store (cosine distance, 1024d float32)
 - **S3** — Document storage (`raw/`, `processed/`, `eda_results/`, `validation/`, `fine-tuning/`)

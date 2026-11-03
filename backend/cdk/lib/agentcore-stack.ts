@@ -9,8 +9,7 @@ import * as logs from 'aws-cdk-lib/aws-logs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as path from 'path';
 
-const SUB_AGENT_MODEL_ID = 'us.amazon.nova-pro-v1:0';
-const ORCHESTRATOR_MODEL_ID = 'us.anthropic.claude-sonnet-4-5-20250929-v1:0';
+const MODEL_ID = 'us.anthropic.claude-sonnet-4-5-20250929-v1:0';
 
 /** key: prefix of the <KEY>_AGENT_ARN variable read by shared/invocation.py */
 const SUB_AGENTS = [
@@ -44,8 +43,7 @@ export class AgentCoreStack extends cdk.Stack {
     super(scope, id, props);
 
     const knowledgeBaseId: string = this.node.tryGetContext('knowledgeBaseId') || '';
-    const subAgentModelId: string = this.node.tryGetContext('subAgentModelId') || SUB_AGENT_MODEL_ID;
-    const orchestratorModelId: string = this.node.tryGetContext('orchestratorModelId') || ORCHESTRATOR_MODEL_ID;
+    const modelId: string = this.node.tryGetContext('modelId') || MODEL_ID;
     const agentCoreDir = path.join(__dirname, '../../agentcore');
 
     // ─────────────────────────────────────────────────────────────────────
@@ -113,7 +111,13 @@ export class AgentCoreStack extends cdk.Stack {
     });
 
     runtimeRole.addToPolicy(new iam.PolicyStatement({
-      actions: ['bedrock:InvokeModel', 'bedrock:InvokeModelWithResponseStream', 'bedrock:Retrieve'],
+      actions: [
+        'bedrock:InvokeModel',
+        'bedrock:InvokeModelWithResponseStream',
+        'bedrock:Retrieve',
+        'bedrock:RetrieveAndGenerate',
+        'bedrock:GetInferenceProfile',
+      ],
       resources: ['*'],
     }));
     runtimeRole.addToPolicy(new iam.PolicyStatement({
@@ -158,6 +162,8 @@ export class AgentCoreStack extends cdk.Stack {
       BUCKET_NAME: this.dataBucket.bucketName,
       FINDINGS_TABLE: 'AuditFindings',
       AUDITS_TABLE: this.auditsTable.tableName,
+      MODEL_ID: modelId,
+      GENERATION_MODEL_ID: modelId,
     };
 
     const createRuntime = (dir: string, name: string, environmentVariables: Record<string, string>) => {
@@ -183,7 +189,7 @@ export class AgentCoreStack extends cdk.Stack {
 
     const subAgentArns: Record<string, string> = {};
     for (const agent of SUB_AGENTS) {
-      const runtime = createRuntime(agent.dir, agent.name, { ...commonEnv, MODEL_ID: subAgentModelId });
+      const runtime = createRuntime(agent.dir, agent.name, commonEnv);
       subAgentArns[`${agent.key}_AGENT_ARN`] = runtime.attrAgentRuntimeArn;
       new cdk.CfnOutput(this, `${agent.key}RuntimeArn`, { value: runtime.attrAgentRuntimeArn });
     }
@@ -193,7 +199,6 @@ export class AgentCoreStack extends cdk.Stack {
     const orchestrator = createRuntime('consolidation_agent', 'iso27001_consolidation', {
       ...commonEnv,
       ...subAgentArns,
-      MODEL_ID: orchestratorModelId,
       AGENTCORE_MEMORY_ID: memory.attrMemoryId,
     });
     this.orchestratorRuntimeArn = orchestrator.attrAgentRuntimeArn;

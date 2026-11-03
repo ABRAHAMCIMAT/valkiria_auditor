@@ -1,7 +1,6 @@
 """
 Checks what a deployment needs before spending on it: credentials, model access,
-tool calling on each model, and the knowledge base. Makes one small Converse call
-per model.
+tool calling on the model, and the knowledge base. Makes one small Converse call.
 
 Usage:
     python preflight.py --knowledge-base-id <id>
@@ -14,10 +13,7 @@ import sys
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
 
-MODELS = {
-    "sub-agents": "us.amazon.nova-pro-v1:0",
-    "orchestrator": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
-}
+MODEL_ID = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
 # Every agent depends on tool calling, so a model answering text only is not enough
 PROBE_TOOL = {
     "toolSpec": {
@@ -54,8 +50,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--knowledge-base-id", required=True)
     parser.add_argument("--region", default=os.environ.get("AWS_REGION", "us-east-1"))
-    parser.add_argument("--orchestrator-model", default=MODELS["orchestrator"])
-    parser.add_argument("--sub-agent-model", default=MODELS["sub-agents"])
+    parser.add_argument("--model", default=MODEL_ID)
     args = parser.parse_args()
 
     problems = []
@@ -68,12 +63,11 @@ def main() -> int:
         return 1
 
     runtime = boto3.client("bedrock-runtime", region_name=args.region)
-    for role, model_id in (("sub-agents", args.sub_agent_model), ("orchestrator", args.orchestrator_model)):
-        problem = check_model(runtime, model_id)
-        if problem:
-            problems.append(f"{role} model {model_id}: {problem}")
-        else:
-            print(f"[INFO] {role} model {model_id}: calls tools")
+    problem = check_model(runtime, args.model)
+    if problem:
+        problems.append(f"model {args.model}: {problem}")
+    else:
+        print(f"[INFO] Model {args.model}: calls tools")
 
     try:
         kb = boto3.client("bedrock-agent", region_name=args.region).get_knowledge_base(

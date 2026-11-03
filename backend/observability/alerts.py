@@ -81,6 +81,7 @@ class AlertManager:
     def create_model_latency_alarms(self, threshold_ms: float = 30000.0):
         """Alert when any model's average latency exceeds threshold."""
         models = [
+            ("claude-sonnet-4.5", "us.anthropic.claude-sonnet-4-5-20250929-v1:0"),
             ("gpt-oss-120b", "openai.gpt-oss-120b-1:0"),
             ("qwen3-32b", "qwen.qwen3-32b-v1:0"),
             ("claude-haiku-4.5", "anthropic.claude-haiku-4-5-20250514-v1:0"),
@@ -147,6 +148,7 @@ class AlertManager:
     def create_model_error_alarms(self):
         """Alert when model success rate drops below 90%."""
         models = [
+            ("claude-sonnet-4.5", "us.anthropic.claude-sonnet-4-5-20250929-v1:0"),
             ("gpt-oss-120b", "openai.gpt-oss-120b-1:0"),
             ("qwen3-32b", "qwen.qwen3-32b-v1:0"),
         ]
@@ -183,6 +185,7 @@ class AlertManager:
     def create_throttling_alarms(self):
         """Alert on model throttling."""
         models = [
+            ("claude-sonnet-4.5", "us.anthropic.claude-sonnet-4-5-20250929-v1:0"),
             ("gpt-oss-120b", "openai.gpt-oss-120b-1:0"),
             ("qwen3-32b", "qwen.qwen3-32b-v1:0"),
         ]

@@ -6,7 +6,7 @@ The model comes from the same environment variables the agents use: MODEL_ID for
 Bedrock, or SAGEMAKER_ENDPOINT_NAME for a fine-tuned adapter.
 
 Usage:
-    MODEL_ID=us.amazon.nova-pro-v1:0 python evaluate_model.py --out baseline.jsonl
+    MODEL_ID=us.anthropic.claude-sonnet-4-5-20250929-v1:0 python evaluate_model.py --out baseline.jsonl
     SAGEMAKER_ENDPOINT_NAME=<endpoint> python evaluate_model.py --out adapter.jsonl
 """
 

@@ -226,4 +226,4 @@ metrics = save_metrics(collector, persist=True)
 | `METRICS_TABLE` | DynamoDB table for metrics storage | `AgentCoreMetrics` |
 | `EVALUATION_BUCKET` | S3 bucket for evaluation datasets/results | — |
 | `EVALUATION_ROLE_ARN` | IAM role ARN for Bedrock Evaluation jobs | — |
-| `MODEL_ID` | Default model ID | `openai.gpt-oss-120b-1:0` |
+| `MODEL_ID` | Default model ID | `us.anthropic.claude-sonnet-4-5-20250929-v1:0` |

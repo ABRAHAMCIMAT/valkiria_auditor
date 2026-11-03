@@ -23,7 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from agents import ANNEX_A_2022  # noqa: E402
 
-DEFAULT_MODEL_ID = "us.amazon.nova-pro-v1:0"
+DEFAULT_MODEL_ID = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
 PASSAGE_CHARS = 6000
 MAX_TOKENS = 4096
 

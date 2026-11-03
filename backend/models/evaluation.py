@@ -250,7 +250,7 @@ class ModelEvaluator:
         model_ids: list[str],
         dataset_s3_uri: str,
         evaluation_type: str = "LLM_AS_JUDGE",
-        judge_model_id: str = "amazon.nova-pro-v1:0",
+        judge_model_id: str = "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
         output_bucket: str = None,
         metrics: list[str] = None,
     ) -> dict:
@@ -320,14 +320,14 @@ class ModelEvaluator:
         # Build inference configs for each model
         inference_configs = []
         for model_id in model_ids:
+            params = {"temperature": 0.2, "maxTokens": 2048}
+            # Claude models reject temperature and topP in the same request
+            if "anthropic." not in model_id:
+                params["topP"] = 0.9
             inference_configs.append({
                 "bedrockModel": {
                     "modelIdentifier": model_id,
-                    "inferenceParams": json.dumps({
-                        "temperature": 0.2,
-                        "maxTokens": 2048,
-                        "topP": 0.9,
-                    }),
+                    "inferenceParams": json.dumps(params),
                 }
             })
 

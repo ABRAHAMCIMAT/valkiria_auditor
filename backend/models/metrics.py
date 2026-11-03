@@ -225,6 +225,7 @@ _MODEL_PRICING = {
     "qwen.qwen3-32b-v1:0": {"input": 0.30, "output": 1.20},
     # Anthropic Claude
     "anthropic.claude-haiku-4-5-20250514-v1:0": {"input": 0.80, "output": 4.00},
+    "anthropic.claude-sonnet-4-5-20250929-v1:0": {"input": 3.00, "output": 15.00},
     "anthropic.claude-sonnet-4-6-20250514-v1:0": {"input": 3.00, "output": 15.00},
     # Meta Llama
     "meta.llama4-maverick-17b-instruct-v1:0": {"input": 0.20, "output": 0.60},
