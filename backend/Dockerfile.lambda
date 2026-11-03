@@ -1,0 +1,13 @@
+# Container image for one backend Lambda. Build from backend/ selecting the service
+# with: --build-arg SERVICE=strandsagents. Modules import as backend.<service>, so the
+# code goes under backend/, and the dependency sets exceed the zip package limit.
+FROM public.ecr.aws/lambda/python:3.12
+
+ARG SERVICE
+COPY ${SERVICE}/requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir --only-binary :all: -r /tmp/requirements.txt -t "${LAMBDA_TASK_ROOT}"
+
+COPY ${SERVICE} ${LAMBDA_TASK_ROOT}/backend/${SERVICE}/
+COPY agentcore/shared ${LAMBDA_TASK_ROOT}/backend/agentcore/shared/
+COPY observability ${LAMBDA_TASK_ROOT}/backend/observability/
+COPY models ${LAMBDA_TASK_ROOT}/backend/models/

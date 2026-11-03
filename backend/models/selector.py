@@ -78,7 +78,7 @@ class ModelSelector:
     def __init__(
         self,
         strategy: SelectionStrategy = SelectionStrategy.FIXED,
-        fixed_model_key: str = "gpt-oss-120b",
+        fixed_model_key: str = "claude-sonnet-4.5",
         region: Optional[str] = None,
         use_cross_region: bool = False,
     ):

@@ -7,8 +7,10 @@ import json
 import uuid
 
 from backend.langgraph.orchestrator import run_audit
+from backend.agentcore.shared.audit_status import track_audit_status
 
 
+@track_audit_status
 def lambda_handler(event: dict, context) -> dict:
     """AWS Lambda entry point."""
     body = json.loads(event.get("body", "{}")) if isinstance(event.get("body"), str) else event

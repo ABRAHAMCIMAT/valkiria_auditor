@@ -14,6 +14,7 @@ from bedrock_agentcore.memory.integrations.strands.session_manager import AgentC
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
+from shared.bedrock_arn import model_arn
 from shared.model_loader import load_model
 from shared.tools.rag_tools import query_knowledge_base, retrieve_control_evidence
 from shared.tools.s3_tools import get_document_content, save_report_to_s3
@@ -50,7 +51,7 @@ def collect_evidence_for_controls(
         return {"error": "KNOWLEDGE_BASE_ID not configured"}
 
     client = boto3.client("bedrock-agent-runtime", region_name=region)
-    model_id = os.environ.get("GENERATION_MODEL_ID", "amazon.nova-pro-v1:0")
+    model_id = os.environ.get("GENERATION_MODEL_ID", "us.anthropic.claude-sonnet-4-5-20250929-v1:0")
     results = []
 
     for control_id in control_ids:
@@ -69,7 +70,7 @@ def collect_evidence_for_controls(
                     "type": "KNOWLEDGE_BASE",
                     "knowledgeBaseConfiguration": {
                         "knowledgeBaseId": kb_id,
-                        "modelArn": f"arn:aws:bedrock:{region}::foundation-model/{model_id}",
+                        "modelArn": model_arn(model_id, region),
                         "retrievalConfiguration": {
                             "vectorSearchConfiguration": {
                                 "numberOfResults": 5,

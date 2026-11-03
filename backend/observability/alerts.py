@@ -20,6 +20,10 @@ REGION = os.environ.get("AWS_REGION", "us-east-1")
 SNS_TOPIC_ARN = os.environ.get("ALERTS_SNS_TOPIC_ARN", "")
 
 
+# Model used by every agent, as (metric name, model ID)
+SONNET_MODEL = ("claude-sonnet-4.5", "us.anthropic.claude-sonnet-4-5-20250929-v1:0")
+
+
 class AlertManager:
     """
     Creates and manages CloudWatch alarms for the audit system.
@@ -81,6 +85,7 @@ class AlertManager:
     def create_model_latency_alarms(self, threshold_ms: float = 30000.0):
         """Alert when any model's average latency exceeds threshold."""
         models = [
+            SONNET_MODEL,
             ("gpt-oss-120b", "openai.gpt-oss-120b-1:0"),
             ("qwen3-32b", "qwen.qwen3-32b-v1:0"),
             ("claude-haiku-4.5", "anthropic.claude-haiku-4-5-20250514-v1:0"),
@@ -147,6 +152,7 @@ class AlertManager:
     def create_model_error_alarms(self):
         """Alert when model success rate drops below 90%."""
         models = [
+            SONNET_MODEL,
             ("gpt-oss-120b", "openai.gpt-oss-120b-1:0"),
             ("qwen3-32b", "qwen.qwen3-32b-v1:0"),
         ]
@@ -183,6 +189,7 @@ class AlertManager:
     def create_throttling_alarms(self):
         """Alert on model throttling."""
         models = [
+            SONNET_MODEL,
             ("gpt-oss-120b", "openai.gpt-oss-120b-1:0"),
             ("qwen3-32b", "qwen.qwen3-32b-v1:0"),
         ]

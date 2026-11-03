@@ -10,3 +10,7 @@ CLAUDE.md
 
 # MacOS files
 .DS_Store
+
+# CDK build output
+node_modules/
+cdk.out/

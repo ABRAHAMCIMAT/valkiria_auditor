@@ -8,7 +8,7 @@ const app = new cdk.App();
 new SastPipelineStack(app, 'Iso27001SastPipelineStack', {
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
-    region: process.env.CDK_DEFAULT_REGION || 'us-west-2',
+    region: process.env.CDK_DEFAULT_REGION || 'us-east-1',
   },
   description: 'ISO 27001 SAST Pipeline — CodePipeline triggered by S3 .zip upload',
 });

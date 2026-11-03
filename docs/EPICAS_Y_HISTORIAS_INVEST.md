@@ -198,7 +198,7 @@ Las historias se redactaron a partir del código y la documentación del reposit
 - RN-40: La URL expira en 3600 segundos por defecto (configurable).
 - RN-41: El archivo debe ser `.zip` con `ContentType: application/zip`.
 - RN-42: La subida incluye metadatos: usuario que sube y nombre del proyecto.
-- RN-43: El `.zip` se almacena en el bucket S3 de origen (`uploads/app.zip`), lo que dispara el pipeline automáticamente.
+- RN-43: El `.zip` se almacena en el bucket S3 de origen (`uploads/application.zip`), lo que dispara el pipeline automáticamente.
 
 **Criterios de aceptación:**
 - Dado que estoy en la sección de evaluación, cuando solicito subir un `.zip`, entonces el sistema genera una URL presigned de `PUT` válida por 1 hora.
@@ -214,7 +214,7 @@ Las historias se redactaron a partir del código y la documentación del reposit
 **Reglas de negocio:**
 - RN-44: El evento `PutObject` en el bucket de origen dispara AWS CodePipeline (`iso27001-sast-pipeline`).
 - RN-45: El pipeline tiene tres etapas: Source (S3 `.zip`), SAST (CodeBuild) y Agent Evaluation (Lambda).
-- RN-46: La etapa SAST descomprime el `.zip` y ejecuta Semgrep con reglas OWASP y auditoría de seguridad.
+- RN-46: La etapa SAST descomprime el `.zip` y ejecuta Semgrep con reglas OWASP y auditoría de seguridad. Un error del escaneo o un `.zip` sin código analizable detiene el pipeline.
 - RN-47: Los hallazgos crudos se almacenan en `sast-reports/` del bucket de resultados.
 - RN-48: El pipeline continúa a la etapa de evaluación solo si la etapa SAST completa con éxito.
 
@@ -231,13 +231,13 @@ Las historias se redactaron a partir del código y la documentación del reposit
 
 **Reglas de negocio:**
 - RN-49: La Lambda `iso27001-sast-agent-evaluation` se invoca como acción de CodePipeline tras la etapa SAST.
-- RN-50: La Lambda recupera los resultados SAST más recientes de `sast-reports/`.
-- RN-51: Los hallazgos se envían a un agente Bedrock respaldado por la base de conocimiento ISO 27001, que mapea cada vulnerabilidad a controles.
+- RN-50: La Lambda recupera de `sast-reports/` los resultados de su misma ejecución del pipeline.
+- RN-51: Los hallazgos se envían a un modelo de Bedrock con contexto de la base de conocimiento ISO 27001, que mapea cada regla a controles. Los controles se validan contra el Anexo A.
 - RN-52: El reporte de evaluación se almacena en `agent-evaluations/` del bucket de resultados.
 - RN-53: La Lambda reporta éxito o fallo de vuelta a CodePipeline.
 
 **Criterios de aceptación:**
-- Dado que existen resultados SAST en `sast-reports/`, cuando la Lambda de evaluación se ejecuta, entonces recupera los hallazgos y los envía al agente Bedrock.
+- Dado que existen resultados SAST en `sast-reports/`, cuando la Lambda de evaluación se ejecuta, entonces recupera los hallazgos de esa ejecución y los envía al modelo de Bedrock.
 - Dado que el agente procesa los hallazgos, cuando genera el reporte, entonces cada vulnerabilidad queda mapeada a controles ISO 27001 y el reporte se guarda en `agent-evaluations/`.
 - Dado que la evaluación falla, cuando la Lambda termina, entonces reporta el fallo a CodePipeline y la ejecución se marca como fallida.
 

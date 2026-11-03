@@ -33,7 +33,7 @@ from backend.models.selector import ModelSelector, SelectionCriteria, SelectionS
 
 def create_instrumented_agent(
     agent_name: str,
-    model_key: str = "gpt-oss-120b",
+    model_key: str = "claude-sonnet-4.5",
     strategy: SelectionStrategy = SelectionStrategy.FIXED,
     criteria: Optional[SelectionCriteria] = None,
     system_prompt: str = "",

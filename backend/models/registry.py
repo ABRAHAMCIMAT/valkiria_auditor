@@ -112,6 +112,24 @@ BEDROCK_MODELS: dict[str, ModelSpec] = {
     ),
 
     # ───── Anthropic Claude Family ─────
+    "claude-sonnet-4.5": ModelSpec(
+        model_id="anthropic.claude-sonnet-4-5-20250929-v1:0",
+        display_name="Claude Sonnet 4.5",
+        provider=ModelProvider.ANTHROPIC,
+        capabilities=[
+            ModelCapability.TEXT_GENERATION,
+            ModelCapability.REASONING,
+            ModelCapability.CODE,
+            ModelCapability.AGENTIC,
+        ],
+        max_context_tokens=200_000,
+        max_output_tokens=16_000,
+        cost_tier=CostTier.MEDIUM,
+        latency_profile=LatencyProfile.BALANCED,
+        recommended_temperature=0.2,
+        cross_region_id="us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        notes="Model used by every agent. Requires its inference profile.",
+    ),
     "claude-sonnet-4.6": ModelSpec(
         model_id="anthropic.claude-sonnet-4-6-20250514-v1:0",
         display_name="Claude Sonnet 4.6",
@@ -231,23 +249,16 @@ def list_models_by_latency(profile: LatencyProfile) -> list[ModelSpec]:
     return [m for m in BEDROCK_MODELS.values() if m.latency_profile == profile]
 
 
-def get_recommended_models_for_agent(agent_role: str) -> list[str]:
+def get_recommended_models_for_agent(_agent_role: str) -> list[str]:
     """
     Get recommended model keys for a specific agent role.
 
     Args:
-        agent_role: One of 'planning', 'evidence', 'organizational',
+        _agent_role: One of 'planning', 'evidence', 'organizational',
                     'people', 'technological', 'consolidation'.
 
     Returns:
         List of model registry keys in priority order.
     """
-    recommendations = {
-        "planning": ["gpt-oss-120b", "claude-sonnet-4.6", "mistral-large", "qwen3-32b"],
-        "evidence": ["qwen3-32b", "claude-haiku-4.5", "llama-4-maverick", "gpt-oss-120b"],
-        "organizational": ["gpt-oss-120b", "claude-sonnet-4.6", "mistral-large", "qwen3-32b"],
-        "people": ["qwen3-32b", "claude-sonnet-4.6", "gpt-oss-120b", "llama-4-maverick"],
-        "technological": ["gpt-oss-120b", "claude-sonnet-4.6", "mistral-large", "qwen3-32b"],
-        "consolidation": ["deepseek-r1", "gpt-oss-120b", "claude-sonnet-4.6", "mistral-large"],
-    }
-    return recommendations.get(agent_role, ["gpt-oss-120b", "qwen3-32b"])
+    # Every agent role uses the same model; the rest of the catalog is for benchmarks
+    return ["claude-sonnet-4.5"]

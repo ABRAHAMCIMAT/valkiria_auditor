@@ -16,8 +16,9 @@ import json
 NAMESPACE = "AgentCore/ISO27001Audit"
 REGION = "us-east-1"
 
-# The 7 models in the registry
+# The models in the registry
 MODELS = [
+    "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
     "openai.gpt-oss-120b-1:0",
     "qwen.qwen3-32b-v1:0",
     "anthropic.claude-haiku-4-5-20250514-v1:0",

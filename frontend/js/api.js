@@ -2,9 +2,15 @@
  * API Client para Auditor Lead
  * Maneja la comunicación con el backend y datos mock para demo
  */
+// Los datos vienen del usuario: se escapan antes de insertarlos como HTML
+function escapeHtml(value) {
+  const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+  return String(value ?? '').replace(/[&<>"']/g, c => entities[c]);
+}
+
 const API = (() => {
   // Configuración del endpoint base (vacío = modo demo con datos mock)
-  const BASE_URL = window.__API_BASE_URL__ || '';
+  const BASE_URL = (window.__API_BASE_URL__ || '').replace(/\/$/, '');
 
   // ===== Datos Mock =====
   const mockAuditorias = [
@@ -126,53 +132,53 @@ const API = (() => {
     }
 
     if (!response.ok) {
-      throw new Error(`Error ${response.status}: ${response.statusText}`);
+      const detail = await response.json().catch(() => ({}));
+      throw new Error(detail.error || `Error ${response.status}: ${response.statusText}`);
     }
 
     return response.json();
   }
 
+  // Sube un archivo a S3 con una URL presigned. Los headers vienen firmados por
+  // el backend y S3 rechaza la subida si no se envían exactamente iguales.
+  async function uploadToS3(url, file, headers) {
+    if (!BASE_URL) return;
+
+    const response = await fetch(url, { method: 'PUT', headers, body: file });
+    if (!response.ok) {
+      throw new Error(`No se pudo subir ${file.name}`);
+    }
+  }
+
+  function mockCreated(collection, body, extra) {
+    const today = new Date().toISOString().split('T')[0];
+    const created = { id: collection.length + 1, ...body, creada: today, actualizacion: today, estado: 'pendiente', ...extra };
+    collection.push(created);
+    return created;
+  }
+
+  function mockResolve(method, path, body) {
+    const isAudit = path.includes('/auditorias');
+    const isEvaluation = path.includes('/evaluaciones');
+    const isFramework = ['/audit/strands', '/audit/langgraph', '/audit/crewai'].some(route => path.includes(route));
+    const routes = [
+      [isAudit && method === 'GET' && !path.includes('/auditorias/'), () => [...mockAuditorias]],
+      [/\/auditorias\/\d+/.test(path) && method === 'GET', () => ({ ...mockAuditoriaDetalle })],
+      [isAudit && method === 'POST', () => mockCreated(mockAuditorias, body, { completada: null })],
+      [isAudit && method === 'DELETE', () => ({ success: true })],
+      [isEvaluation && method === 'GET', () => [...mockEvaluaciones]],
+      [isEvaluation && method === 'POST', () => mockCreated(mockEvaluaciones, body, { resultado: null })],
+      [path.includes('/sast/upload-url'), () => ({ uploadUrl: '', headers: {} })],
+      [isFramework, () => ({ status: 'ejecutando', agente: path.split('/').pop(), mensaje: 'Auditoría ISO 27001:2022 iniciada' })],
+      [path.includes('/audit/comp2013'), () => ({ status: 'ejecutando', mensaje: 'Auditoría ISO 27001:2013 iniciada' })],
+    ];
+    const route = routes.find(([matches]) => matches);
+    return route ? route[1]() : {};
+  }
+
   function mockResponse(method, path, body) {
     return new Promise((resolve) => {
-      setTimeout(() => {
-        if (path.includes('/auditorias') && method === 'GET' && !path.includes('/auditorias/')) {
-          resolve([...mockAuditorias]);
-        } else if (path.match(/\/auditorias\/\d+/) && method === 'GET') {
-          resolve({ ...mockAuditoriaDetalle });
-        } else if (path.includes('/auditorias') && method === 'POST') {
-          const newAuditoria = {
-            id: mockAuditorias.length + 1,
-            ...body,
-            creada: new Date().toISOString().split('T')[0],
-            actualizacion: new Date().toISOString().split('T')[0],
-            completada: null,
-            estado: 'pendiente'
-          };
-          mockAuditorias.push(newAuditoria);
-          resolve(newAuditoria);
-        } else if (path.includes('/auditorias') && method === 'DELETE') {
-          resolve({ success: true });
-        } else if (path.includes('/evaluaciones') && method === 'GET') {
-          resolve([...mockEvaluaciones]);
-        } else if (path.includes('/evaluaciones') && method === 'POST') {
-          const newEval = {
-            id: mockEvaluaciones.length + 1,
-            ...body,
-            creada: new Date().toISOString().split('T')[0],
-            actualizacion: new Date().toISOString().split('T')[0],
-            estado: 'pendiente',
-            resultado: null
-          };
-          mockEvaluaciones.push(newEval);
-          resolve(newEval);
-        } else if (path.includes('/audit/strands') || path.includes('/audit/langgraph') || path.includes('/audit/crewai')) {
-          resolve({ status: 'ejecutando', agente: path.split('/').pop(), mensaje: 'Auditoría ISO 27001:2022 iniciada' });
-        } else if (path.includes('/audit/comp2013')) {
-          resolve({ status: 'ejecutando', mensaje: 'Auditoría ISO 27001:2013 iniciada' });
-        } else {
-          resolve({});
-        }
-      }, 300);
+      setTimeout(() => resolve(mockResolve(method, path, body)), 300);
     });
   }
 
@@ -196,15 +202,31 @@ const API = (() => {
     },
 
     // Ejecutar auditoría según versión ISO
-    ejecutarAuditoria(isoVersion, framework = 'strands') {
+    // La ejecución es asíncrona: el estado se consulta en la auditoría
+    ejecutarAuditoria(auditId, isoVersion, framework = 'strands') {
       if (isoVersion === '2013') {
-        return request('POST', '/audit/comp2013');
+        return request('POST', '/audit/comp2013', { audit_id: auditId });
       }
       // ISO 2022 - seleccionar framework
-      return request('POST', `/audit/${framework}`);
+      return request('POST', `/audit/${framework}`, { audit_id: auditId });
+    },
+
+    // Sube los archivos con las URLs que devuelve createAuditoria
+    subirArchivos(uploads, files) {
+      return Promise.all(uploads.map((upload, i) => uploadToS3(upload.url, files[i], upload.headers)));
+    },
+
+    // Sube el .zip de código, que inicia el análisis SAST de la evaluación
+    async subirCodigoSast(evaluationId, zip) {
+      const upload = await request('POST', '/sast/upload-url', { evaluationId });
+      return uploadToS3(upload.uploadUrl, zip, upload.headers);
     },
 
     // Evaluaciones
+    getEvaluacion(id) {
+      return request('GET', `/evaluaciones/${id}`);
+    },
+
     getEvaluaciones() {
       return request('GET', '/evaluaciones');
     },

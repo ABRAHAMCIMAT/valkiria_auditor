@@ -1,11 +1,9 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
-import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
-import * as path from 'path';
 
 /**
  * FrontendStack — Deploys:
@@ -14,6 +12,11 @@ import * as path from 'path';
  * - Cognito User Pool with admin and user1
  */
 export class FrontendStack extends cdk.Stack {
+  public readonly siteBucket: s3.IBucket;
+  public readonly distribution: cloudfront.IDistribution;
+  public readonly userPool: cognito.IUserPool;
+  public readonly userPoolClient: cognito.IUserPoolClient;
+
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -65,15 +68,7 @@ export class FrontendStack extends cdk.Stack {
     // ─────────────────────────────────────────────────────────────────
     // 3. S3 DEPLOYMENT — Upload frontend files
     // ─────────────────────────────────────────────────────────────────
-    new s3deploy.BucketDeployment(this, 'DeployFrontend', {
-      sources: [s3deploy.Source.asset(path.join(__dirname, '../../../frontend'), {
-        exclude: ['assets/diagrams/*', 'assets/images/security_banner.jpg'],
-      })],
-      destinationBucket: websiteBucket,
-      distribution: distribution,
-      distributionPaths: ['/*'],
-      memoryLimit: 512,
-    });
+    // Deployed from BackendStack, because config.js depends on the API URL
 
     // ─────────────────────────────────────────────────────────────────
     // 4. COGNITO — User Pool + Users
@@ -122,6 +117,11 @@ export class FrontendStack extends cdk.Stack {
       ],
       messageAction: 'SUPPRESS',
     });
+
+    this.siteBucket = websiteBucket;
+    this.distribution = distribution;
+    this.userPool = userPool;
+    this.userPoolClient = userPoolClient;
 
     // ─────────────────────────────────────────────────────────────────
     // 5. OUTPUTS

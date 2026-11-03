@@ -9,9 +9,10 @@ It uses the "Agents as Tools" pattern to invoke specialized sub-agents.
 
 import json
 import os
+import threading
 from datetime import datetime
 
-import httpx
+import boto3
 from strands import Agent, tool
 from bedrock_agentcore import BedrockAgentCoreApp
 from bedrock_agentcore.memory.integrations.strands.config import AgentCoreMemoryConfig
@@ -20,6 +21,8 @@ from bedrock_agentcore.memory.integrations.strands.session_manager import AgentC
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
+from shared.audit_status import ESTADO_COMPLETADA, ESTADO_ERROR, ERROR_MESSAGE_LIMIT, update_audit_status
+from shared.invocation import invoke_sub_agent
 from shared.model_loader import load_model
 from shared.tools.rag_tools import query_knowledge_base
 from shared.tools.dynamodb_tools import save_audit_finding, list_audit_findings
@@ -29,36 +32,8 @@ from shared.prompts.consolidation import SYSTEM_PROMPT
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SUB-AGENT INVOCATION TOOLS
-# Uses AgentCore invoke to call deployed sub-agents
+# Uses AgentCore invoke to call deployed sub-agents (see shared/invocation.py)
 # ─────────────────────────────────────────────────────────────────────────────
-
-def _invoke_sub_agent(agent_endpoint: str, payload: dict) -> dict:
-    """
-    Internal helper to invoke a deployed sub-agent via HTTP.
-    In production, this uses the AgentCore runtime endpoint.
-    In local dev, routes to localhost with different ports.
-    """
-    is_local = os.environ.get("LOCAL_DEV", "0") == "1"
-
-    if is_local:
-        # Local dev: sub-agents run on different ports
-        url = agent_endpoint
-    else:
-        # Production: use AgentCore runtime invoke
-        url = f"{agent_endpoint}/invocations"
-
-    try:
-        response = httpx.post(
-            url,
-            json=payload,
-            timeout=120.0,
-            headers={"Content-Type": "application/json"},
-        )
-        response.raise_for_status()
-        return response.json()
-    except Exception as exc:
-        return {"error": f"Sub-agent invocation failed: {exc}"}
-
 
 @tool
 def invoke_planning_agent(
@@ -78,8 +53,7 @@ def invoke_planning_agent(
     Returns:
         Dict with the planning agent's response including audit plan details.
     """
-    endpoint = os.environ.get("PLANNING_AGENT_ENDPOINT", "http://localhost:8081/invocations")
-    return _invoke_sub_agent(endpoint, {
+    return invoke_sub_agent("PLANNING", {
         "prompt": prompt,
         "session_id": session_id,
         "actor_id": actor_id,
@@ -104,8 +78,7 @@ def invoke_evidence_agent(
     Returns:
         Dict with evidence collection results, sufficiency assessment, and gaps.
     """
-    endpoint = os.environ.get("EVIDENCE_AGENT_ENDPOINT", "http://localhost:8082/invocations")
-    return _invoke_sub_agent(endpoint, {
+    return invoke_sub_agent("EVIDENCE", {
         "prompt": prompt,
         "session_id": session_id,
         "actor_id": actor_id,
@@ -130,8 +103,7 @@ def invoke_organizational_controls_agent(
     Returns:
         Dict with conformity assessments, findings, and maturity scores for A.5 controls.
     """
-    endpoint = os.environ.get("ORG_CONTROLS_AGENT_ENDPOINT", "http://localhost:8083/invocations")
-    return _invoke_sub_agent(endpoint, {
+    return invoke_sub_agent("ORG_CONTROLS", {
         "prompt": prompt,
         "session_id": session_id,
         "actor_id": actor_id,
@@ -156,8 +128,32 @@ def invoke_people_controls_agent(
     Returns:
         Dict with conformity assessments, findings, and maturity scores for A.6 controls.
     """
-    endpoint = os.environ.get("PEOPLE_CONTROLS_AGENT_ENDPOINT", "http://localhost:8084/invocations")
-    return _invoke_sub_agent(endpoint, {
+    return invoke_sub_agent("PEOPLE_CONTROLS", {
+        "prompt": prompt,
+        "session_id": session_id,
+        "actor_id": actor_id,
+    })
+
+
+@tool
+def invoke_physical_controls_agent(
+    prompt: str,
+    session_id: str = "",
+    actor_id: str = "orchestrator",
+) -> dict:
+    """
+    Invoke the Physical Controls Agent (A.7) to evaluate 14 physical and environmental controls.
+    Assesses perimeters, entry, monitoring, environmental protection, and equipment security.
+
+    Args:
+        prompt: Instructions and context for A.7 control evaluation (include evidence summary).
+        session_id: Session ID for continuity.
+        actor_id: Actor performing the action.
+
+    Returns:
+        Dict with conformity assessments, findings, and maturity scores for A.7 controls.
+    """
+    return invoke_sub_agent("PHYSICAL_CONTROLS", {
         "prompt": prompt,
         "session_id": session_id,
         "actor_id": actor_id,
@@ -182,8 +178,7 @@ def invoke_technological_controls_agent(
     Returns:
         Dict with conformity assessments, findings, and maturity scores for A.8 controls.
     """
-    endpoint = os.environ.get("TECH_CONTROLS_AGENT_ENDPOINT", "http://localhost:8085/invocations")
-    return _invoke_sub_agent(endpoint, {
+    return invoke_sub_agent("TECH_CONTROLS", {
         "prompt": prompt,
         "session_id": session_id,
         "actor_id": actor_id,
@@ -320,12 +315,9 @@ def generate_executive_summary(
 app = BedrockAgentCoreApp()
 
 
-@app.entrypoint
-def invoke(payload: dict) -> dict:
-    """Consolidation Orchestrator Agent entrypoint."""
+def _run_audit(payload: dict, session_id: str, actor_id: str) -> str:
+    """Build the orchestrator agent and run the audit prompt."""
     memory_id = os.environ.get("AGENTCORE_MEMORY_ID", "")
-    session_id = payload.get("session_id", f"audit_{datetime.now().strftime('%Y%m%d%H%M%S')}")
-    actor_id = payload.get("actor_id", "lead_auditor")
 
     session_manager = None
     if memory_id:
@@ -348,6 +340,7 @@ def invoke(payload: dict) -> dict:
             invoke_evidence_agent,
             invoke_organizational_controls_agent,
             invoke_people_controls_agent,
+            invoke_physical_controls_agent,
             invoke_technological_controls_agent,
             # Orchestrator tools
             verify_findings_consistency,
@@ -361,11 +354,59 @@ def invoke(payload: dict) -> dict:
         session_manager=session_manager,
     )
 
-    prompt = payload.get("prompt", "")
-    response = agent(prompt)
+    return str(agent(payload.get("prompt", "")))
+
+
+def _run_audit_in_background(payload: dict, session_id: str, actor_id: str, task_id: int) -> None:
+    """Run an accepted audit and record its outcome on the audit record."""
+    tenant_id = payload.get("tenant_id", "")
+    audit_id = payload.get("audit_id", "")
+    try:
+        report = _run_audit(payload, session_id, actor_id)
+        report_key = f"reports/{tenant_id}/{audit_id}/consolidated.md"
+        boto3.client("s3", region_name=os.environ.get("AWS_REGION", "us-east-1")).put_object(
+            Bucket=os.environ["BUCKET_NAME"],
+            Key=report_key,
+            Body=report.encode("utf-8"),
+            ContentType="text/markdown; charset=utf-8",
+            ExpectedBucketOwner=os.environ["AWS_ACCOUNT_ID"],
+        )
+        update_audit_status(tenant_id, audit_id, ESTADO_COMPLETADA, report_key=report_key)
+    except Exception as exc:
+        print(f"[ERROR] Audit {audit_id} failed: {exc}")
+        update_audit_status(tenant_id, audit_id, ESTADO_ERROR, error=str(exc)[:ERROR_MESSAGE_LIMIT])
+    finally:
+        app.complete_async_task(task_id)
+
+
+@app.entrypoint
+def invoke(payload: dict) -> dict:
+    """
+    Consolidation Orchestrator Agent entrypoint.
+
+    With "async": true the audit keeps running after the response, which lets the
+    API return immediately: a full audit far exceeds API Gateway's timeout. The
+    registered async task keeps the runtime session alive until it finishes.
+    """
+    session_id = payload.get("session_id", f"audit_{datetime.now().strftime('%Y%m%d%H%M%S')}")
+    actor_id = payload.get("actor_id", "lead_auditor")
+
+    if payload.get("async"):
+        task_id = app.add_async_task("iso27001_audit", {"audit_id": payload.get("audit_id", "")})
+        threading.Thread(
+            target=_run_audit_in_background,
+            args=(payload, session_id, actor_id, task_id),
+            daemon=True,
+        ).start()
+        return {
+            "status": "accepted",
+            "audit_id": payload.get("audit_id", ""),
+            "session_id": session_id,
+            "agent": "consolidation_agent",
+        }
 
     return {
-        "response": str(response),
+        "response": _run_audit(payload, session_id, actor_id),
         "session_id": session_id,
         "actor_id": actor_id,
         "agent": "consolidation_agent",

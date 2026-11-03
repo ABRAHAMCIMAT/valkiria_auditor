@@ -7,21 +7,42 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch';
 import * as sns from 'aws-cdk-lib/aws-sns';
+import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
+import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
+import * as cognito from 'aws-cdk-lib/aws-cognito';
+import * as ecrAssets from 'aws-cdk-lib/aws-ecr-assets';
 import * as path from 'path';
+
+export interface BackendStackProps extends cdk.StackProps {
+  userPool: cognito.IUserPool;
+  userPoolClient: cognito.IUserPoolClient;
+  siteBucket: s3.IBucket;
+  distribution: cloudfront.IDistribution;
+  /** Audit records table, shared with the AgentCore and SAST stacks */
+  auditsTable: dynamodb.ITable;
+  dataBucket: s3.IBucket;
+  /** Consolidation runtime: when set, Strands audits run on AgentCore */
+  orchestratorRuntimeArn?: string;
+  /** Lambda that issues SAST upload URLs, from Iso27001SastPipelineStack */
+  sastUploadFunctionArn?: string;
+  sastResultsBucketName?: string;
+}
 
 /**
  * BackendStack — Deploys the multi-agent ISO 27001 audit backend:
  *
  * - Lambda functions for each orchestration framework (Strands, LangGraph, CrewAI)
  * - DynamoDB table for metrics persistence
- * - API Gateway for triggering audits
+ * - API Gateway with the Cognito authorizer, backed by the platform API Lambda
+ * - The frontend assets with its runtime configuration
  * - CloudWatch dashboard and alarms
  * - IAM roles with least-privilege Bedrock access
  *
  * Imports from IngestionStack: bucket name, KB role ARN, OpenSearch endpoint
  */
 export class BackendStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: BackendStackProps) {
     super(scope, id, props);
 
     // ─────────────────────────────────────────────────────────────────────
@@ -120,6 +141,7 @@ export class BackendStack extends cdk.Stack {
                 `${metricsTable.tableArn}/index/*`,
                 findingsTable.tableArn,
                 `${findingsTable.tableArn}/index/*`,
+                props.auditsTable.tableArn,
               ],
             }),
           ],
@@ -139,9 +161,11 @@ export class BackendStack extends cdk.Stack {
           statements: [
             new iam.PolicyStatement({
               actions: [
-                'bedrock-agentcore:InvokeMemory',
-                'bedrock-agentcore:GetMemory',
-                'bedrock-agentcore:ListMemories',
+                'bedrock-agentcore:CreateEvent',
+                'bedrock-agentcore:ListEvents',
+                'bedrock-agentcore:GetEvent',
+                'bedrock-agentcore:RetrieveMemoryRecords',
+                'bedrock-agentcore:ListMemoryRecords',
               ],
               resources: ['*'],
             }),
@@ -163,14 +187,20 @@ export class BackendStack extends cdk.Stack {
     });
 
     // ─────────────────────────────────────────────────────────────────────
-    // 3. LAMBDA LAYER — Shared Python dependencies
+    // 3. LAMBDA IMAGES — One container per service
+    // Handlers import as backend.<service> and the framework dependency sets
+    // exceed the zip limit, so the zip + shared layer packaging cannot run them.
     // ─────────────────────────────────────────────────────────────────────
-    const sharedLayer = new lambda.LayerVersion(this, 'SharedDepsLayer', {
-      layerVersionName: 'iso27001-backend-shared-deps',
-      description: 'Shared Python dependencies: boto3, pydantic, strands-agents',
-      compatibleRuntimes: [lambda.Runtime.PYTHON_3_12],
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../layers/shared')),
-    });
+    const serviceCode = (service: string) => lambda.DockerImageCode.fromImageAsset(
+      path.join(__dirname, '../..'),
+      {
+        file: 'Dockerfile.lambda',
+        buildArgs: { SERVICE: service },
+        cmd: [`backend.${service}.handler.lambda_handler`],
+        platform: ecrAssets.Platform.LINUX_ARM64,
+        exclude: ['cdk', 'tests'],
+      },
+    );
 
     // ─────────────────────────────────────────────────────────────────────
     // 4. LAMBDA — Strands Agents Orchestrator
@@ -180,21 +210,19 @@ export class BackendStack extends cdk.Stack {
       METRICS_TABLE: metricsTable.tableName,
       FINDINGS_TABLE: findingsTable.tableName,
       METRICS_PREFIX: 'metrics/',
-      PRIMARY_MODEL_ID: 'openai.gpt-oss-120b-1:0',
-      FAST_MODEL_ID: 'qwen.qwen3-32b-v1:0',
-      KNOWLEDGE_BASE_ID: '', // Set post-deployment
-      AGENTCORE_MEMORY_ID: '', // Set after: agentcore memory create iso27001_audit_memory --wait
+      PRIMARY_MODEL_ID: 'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
+      FAST_MODEL_ID: 'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
+      KNOWLEDGE_BASE_ID: this.node.tryGetContext('knowledgeBaseId') || '',
+      AUDITS_TABLE: props.auditsTable.tableName,
       LOG_LEVEL: 'INFO',
     };
 
-    const strandsLambda = new lambda.Function(this, 'StrandsOrchestratorLambda', {
+    const strandsLambda = new lambda.DockerImageFunction(this, 'StrandsOrchestratorLambda', {
       functionName: 'iso27001-strands-orchestrator',
-      runtime: lambda.Runtime.PYTHON_3_12,
-      handler: 'handler.lambda_handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../strandsagents')),
-      layers: [sharedLayer],
+      code: serviceCode('strandsagents'),
+      architecture: lambda.Architecture.ARM_64,
       role: agentLambdaRole,
-      timeout: cdk.Duration.minutes(10),
+      timeout: cdk.Duration.minutes(15),
       memorySize: 2048,
       environment: {
         ...commonEnv,
@@ -206,14 +234,12 @@ export class BackendStack extends cdk.Stack {
     // ─────────────────────────────────────────────────────────────────────
     // 5. LAMBDA — LangGraph Orchestrator
     // ─────────────────────────────────────────────────────────────────────
-    const langgraphLambda = new lambda.Function(this, 'LangGraphOrchestratorLambda', {
+    const langgraphLambda = new lambda.DockerImageFunction(this, 'LangGraphOrchestratorLambda', {
       functionName: 'iso27001-langgraph-orchestrator',
-      runtime: lambda.Runtime.PYTHON_3_12,
-      handler: 'handler.lambda_handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../langgraph')),
-      layers: [sharedLayer],
+      code: serviceCode('langgraph'),
+      architecture: lambda.Architecture.ARM_64,
       role: agentLambdaRole,
-      timeout: cdk.Duration.minutes(10),
+      timeout: cdk.Duration.minutes(15),
       memorySize: 2048,
       environment: {
         ...commonEnv,
@@ -225,14 +251,12 @@ export class BackendStack extends cdk.Stack {
     // ─────────────────────────────────────────────────────────────────────
     // 6. LAMBDA — CrewAI Orchestrator
     // ─────────────────────────────────────────────────────────────────────
-    const crewaiLambda = new lambda.Function(this, 'CrewAIOrchestratorLambda', {
+    const crewaiLambda = new lambda.DockerImageFunction(this, 'CrewAIOrchestratorLambda', {
       functionName: 'iso27001-crewai-orchestrator',
-      runtime: lambda.Runtime.PYTHON_3_12,
-      handler: 'handler.lambda_handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../crewai')),
-      layers: [sharedLayer],
+      code: serviceCode('crewai'),
+      architecture: lambda.Architecture.ARM_64,
       role: agentLambdaRole,
-      timeout: cdk.Duration.minutes(10),
+      timeout: cdk.Duration.minutes(15),
       memorySize: 2048,
       environment: {
         ...commonEnv,
@@ -244,19 +268,16 @@ export class BackendStack extends cdk.Stack {
     // ─────────────────────────────────────────────────────────────────────
     // 6b. LAMBDA — ISO 27001:2013 Comparative Orchestrator (comp2013)
     // ─────────────────────────────────────────────────────────────────────
-    const comp2013Lambda = new lambda.Function(this, 'Comp2013OrchestratorLambda', {
+    const comp2013Lambda = new lambda.DockerImageFunction(this, 'Comp2013OrchestratorLambda', {
       functionName: 'iso27001-comp2013-orchestrator',
-      runtime: lambda.Runtime.PYTHON_3_12,
-      handler: 'handler.lambda_handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../comp2013')),
-      layers: [sharedLayer],
+      code: serviceCode('comp2013'),
+      architecture: lambda.Architecture.ARM_64,
       role: agentLambdaRole,
-      timeout: cdk.Duration.minutes(10),
+      timeout: cdk.Duration.minutes(15),
       memorySize: 2048,
       environment: {
         ...commonEnv,
         FRAMEWORK: 'comp2013',
-        PRIMARY_MODEL_ID: 'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
         JUDGE_MODEL_ID: 'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
         VECTOR_STORE_BUCKET: 'iso27001-vectors-e16',
         VECTOR_STORE_INDEX: 'iso27001-compliance-index',
@@ -267,14 +288,64 @@ export class BackendStack extends cdk.Stack {
     });
 
     // ─────────────────────────────────────────────────────────────────────
-    // 7. API GATEWAY — Audit trigger API
+    // 7. API GATEWAY — Platform API behind the Cognito authorizer
+    // Audits run asynchronously: API Gateway cuts responses at 29 seconds, so
+    // the frontend starts them here and follows the status on the audit record.
     // ─────────────────────────────────────────────────────────────────────
+    const siteOrigin = `https://${props.distribution.distributionDomainName}`;
+    const frameworkLambdas: Record<string, lambda.IFunction> = {
+      strands: strandsLambda,
+      langgraph: langgraphLambda,
+      crewai: crewaiLambda,
+      comp2013: comp2013Lambda,
+    };
+
+    const platformLambda = new lambda.DockerImageFunction(this, 'PlatformApiLambda', {
+      functionName: 'iso27001-platform-api',
+      code: serviceCode('api'),
+      architecture: lambda.Architecture.ARM_64,
+      timeout: cdk.Duration.seconds(29),
+      memorySize: 512,
+      environment: {
+        AUDITS_TABLE: props.auditsTable.tableName,
+        FINDINGS_TABLE: findingsTable.tableName,
+        DATA_BUCKET: props.dataBucket.bucketName,
+        SAST_RESULTS_BUCKET: props.sastResultsBucketName || '',
+        ALLOWED_ORIGIN: siteOrigin,
+        ORCHESTRATOR_RUNTIME_ARN: props.orchestratorRuntimeArn || '',
+        FRAMEWORK_FUNCTIONS: cdk.Stack.of(this).toJsonString(
+          Object.fromEntries(Object.entries(frameworkLambdas).map(([name, fn]) => [name, fn.functionName])),
+        ),
+      },
+      logRetention: logs.RetentionDays.TWO_WEEKS,
+    });
+
+    props.auditsTable.grantReadWriteData(platformLambda);
+    findingsTable.grantReadData(platformLambda);
+    props.dataBucket.grantRead(platformLambda);
+    props.dataBucket.grantPut(platformLambda, 'uploads/*');
+    Object.values(frameworkLambdas).forEach(fn => fn.grantInvoke(platformLambda));
+    if (props.sastResultsBucketName) {
+      s3.Bucket.fromBucketName(this, 'SastResultsBucket', props.sastResultsBucketName)
+        .grantRead(platformLambda, 'agent-evaluations/*');
+    }
+    if (props.orchestratorRuntimeArn) {
+      platformLambda.addToRolePolicy(new iam.PolicyStatement({
+        actions: ['bedrock-agentcore:InvokeAgentRuntime'],
+        resources: [props.orchestratorRuntimeArn, `${props.orchestratorRuntimeArn}/*`],
+      }));
+    }
+
+    // Lambdas record their outcome and store reports where the API serves them from
+    props.auditsTable.grant(agentLambdaRole, 'dynamodb:UpdateItem');
+    props.dataBucket.grantReadWrite(agentLambdaRole);
+
     const api = new apigateway.RestApi(this, 'BackendApi', {
       restApiName: 'iso27001-backend-api',
-      description: 'API for triggering ISO 27001 multi-agent audits',
+      description: 'API for the ISO 27001 audit platform',
       defaultCorsPreflightOptions: {
-        allowOrigins: apigateway.Cors.ALL_ORIGINS,
-        allowMethods: apigateway.Cors.ALL_METHODS,
+        allowOrigins: [siteOrigin],
+        allowMethods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
         allowHeaders: ['Content-Type', 'Authorization'],
       },
       deployOptions: {
@@ -286,23 +357,69 @@ export class BackendStack extends cdk.Stack {
       },
     });
 
-    // POST /audit/strands
-    const auditResource = api.root.addResource('audit');
+    const authorizer = new apigateway.CognitoUserPoolsAuthorizer(this, 'PlatformAuthorizer', {
+      cognitoUserPools: [props.userPool],
+    });
+    const secured: apigateway.MethodOptions = {
+      authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    };
+    const platform = new apigateway.LambdaIntegration(platformLambda);
 
-    const strandsResource = auditResource.addResource('strands');
-    strandsResource.addMethod('POST', new apigateway.LambdaIntegration(strandsLambda));
+    const auditorias = api.root.addResource('auditorias');
+    auditorias.addMethod('GET', platform, secured);
+    auditorias.addMethod('POST', platform, secured);
+    const auditoria = auditorias.addResource('{id}');
+    auditoria.addMethod('GET', platform, secured);
+    auditoria.addMethod('DELETE', platform, secured);
 
-    // POST /audit/langgraph
-    const langgraphResource = auditResource.addResource('langgraph');
-    langgraphResource.addMethod('POST', new apigateway.LambdaIntegration(langgraphLambda));
+    const evaluaciones = api.root.addResource('evaluaciones');
+    evaluaciones.addMethod('GET', platform, secured);
+    evaluaciones.addMethod('POST', platform, secured);
+    evaluaciones.addResource('{id}').addMethod('GET', platform, secured);
 
-    // POST /audit/crewai
-    const crewaiResource = auditResource.addResource('crewai');
-    crewaiResource.addMethod('POST', new apigateway.LambdaIntegration(crewaiLambda));
+    // POST /audit/{framework}: strands, langgraph, crewai, comp2013
+    api.root.addResource('audit').addResource('{framework}').addMethod('POST', platform, secured);
 
-    // POST /audit/comp2013
-    const comp2013Resource = auditResource.addResource('comp2013');
-    comp2013Resource.addMethod('POST', new apigateway.LambdaIntegration(comp2013Lambda));
+    // POST /sast/upload-url
+    if (props.sastUploadFunctionArn) {
+      const sastUpload = lambda.Function.fromFunctionAttributes(this, 'SastUploadFunction', {
+        functionArn: props.sastUploadFunctionArn,
+        sameEnvironment: true,
+      });
+      api.root.addResource('sast').addResource('upload-url')
+        .addMethod('POST', new apigateway.LambdaIntegration(sastUpload), secured);
+    }
+
+    // Error responses generated by API Gateway need CORS too, or the browser
+    // reports an expired token as a network failure instead of a 401
+    for (const type of [apigateway.ResponseType.DEFAULT_4XX, apigateway.ResponseType.DEFAULT_5XX]) {
+      api.addGatewayResponse(`Cors${type.responseType}`, {
+        type,
+        responseHeaders: { 'Access-Control-Allow-Origin': `'${siteOrigin}'` },
+      });
+    }
+
+    // The site configuration depends on this API, so the assets deploy from this stack
+    new s3deploy.BucketDeployment(this, 'DeployFrontend', {
+      sources: [
+        s3deploy.Source.asset(path.join(__dirname, '../../../frontend'), {
+          exclude: ['assets/diagrams/*', 'assets/images/security_banner.jpg'],
+        }),
+        s3deploy.Source.data('config.js', cdk.Fn.join('', [
+          'window.__API_BASE_URL__=', cdk.Stack.of(this).toJsonString(api.url), ';',
+          'window.__APP_CONFIG__=', cdk.Stack.of(this).toJsonString({
+            region: this.region,
+            userPoolId: props.userPool.userPoolId,
+            clientId: props.userPoolClient.userPoolClientId,
+          }), ';',
+        ])),
+      ],
+      destinationBucket: props.siteBucket,
+      distribution: props.distribution,
+      distributionPaths: ['/*'],
+      memoryLimit: 512,
+    });
 
     // ─────────────────────────────────────────────────────────────────────
     // 8. SNS TOPIC — Alerts
@@ -409,26 +526,6 @@ export class BackendStack extends cdk.Stack {
       value: api.url,
       description: 'Backend API Gateway endpoint',
       exportName: 'Iso27001BackendApiEndpoint',
-    });
-
-    new cdk.CfnOutput(this, 'StrandsEndpoint', {
-      value: `${api.url}audit/strands`,
-      description: 'Strands Agents audit endpoint',
-    });
-
-    new cdk.CfnOutput(this, 'LangGraphEndpoint', {
-      value: `${api.url}audit/langgraph`,
-      description: 'LangGraph audit endpoint',
-    });
-
-    new cdk.CfnOutput(this, 'CrewAIEndpoint', {
-      value: `${api.url}audit/crewai`,
-      description: 'CrewAI audit endpoint',
-    });
-
-    new cdk.CfnOutput(this, 'Comp2013Endpoint', {
-      value: `${api.url}audit/comp2013`,
-      description: 'ISO 27001:2013 comparative audit endpoint',
     });
 
     new cdk.CfnOutput(this, 'MetricsTableName', {

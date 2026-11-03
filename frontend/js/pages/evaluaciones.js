@@ -2,6 +2,9 @@
  * Evaluaciones Page - Lista de evaluaciones
  */
 const EvaluacionesPage = {
+  MAX_ZIP_BYTES: 50 * 1024 * 1024,
+  codigoZip: null,
+
   render() {
     return `
       <div class="page-header">
@@ -77,9 +80,9 @@ const EvaluacionesPage = {
               <div class="upload-area" id="upload-area" role="button" tabindex="0" aria-label="Área de carga de archivos">
                 <div class="upload-area__icon">📁</div>
                 <p class="upload-area__text">Arrastra archivos aquí o haz clic para seleccionar</p>
-                <p class="upload-area__text" style="font-size:0.8rem; margin-top:0.5rem;">Código fuente, configuraciones, documentación</p>
+                <p class="upload-area__text" style="font-size:0.8rem; margin-top:0.5rem;">Archivo .zip con el código fuente: inicia el análisis SAST</p>
               </div>
-              <input type="file" id="evaluacion-archivos" multiple style="display:none;" aria-label="Seleccionar archivos">
+              <input type="file" id="evaluacion-archivos" accept=".zip" style="display:none;" aria-label="Seleccionar archivo ZIP">
               <div id="archivos-lista" style="margin-top:0.5rem; font-size:0.85rem;"></div>
             </div>
             <div class="form-group">
@@ -163,25 +166,38 @@ const EvaluacionesPage = {
       const conexiones = document.getElementById('evaluacion-conexiones').value;
 
       try {
-        await API.createEvaluacion({ nombre, isoVersion, endpoints, conexiones });
+        const evaluacion = await API.createEvaluacion({ nombre, isoVersion, endpoints, conexiones });
+        if (this.codigoZip) {
+          await API.subirCodigoSast(evaluacion.id, this.codigoZip);
+        }
+        this.codigoZip = null;
         this.closeModal(modal);
         form.reset();
         archivosLista.innerHTML = '';
         await this.loadData(tbody, filterIso.value);
         App.showToast('Evaluación creada exitosamente', 'success');
       } catch (error) {
-        App.showToast('Error al crear evaluación', 'error');
+        App.showToast(error.message || 'Error al crear evaluación', 'error');
       }
     });
   },
 
   handleFiles(files, container) {
-    const fileNames = Array.from(files).map(f => f.name);
-    container.innerHTML = fileNames.map(name => `
+    const zip = Array.from(files).find(f => f.name.toLowerCase().endsWith('.zip'));
+    if (!zip) {
+      App.showToast('Solo se aceptan archivos .zip', 'error');
+      return;
+    }
+    if (zip.size > this.MAX_ZIP_BYTES) {
+      App.showToast('El archivo excede 50MB', 'error');
+      return;
+    }
+    this.codigoZip = zip;
+    container.innerHTML = `
       <span style="display:inline-block; background:#f0f0f0; padding:0.2rem 0.5rem; border-radius:4px; margin:0.2rem; font-size:0.8rem;">
-        📄 ${name}
+        📦 ${escapeHtml(zip.name)}
       </span>
-    `).join('');
+    `;
   },
 
   async loadData(tbody, filter = 'todas') {
@@ -209,12 +225,12 @@ const EvaluacionesPage = {
       tbody.innerHTML = evaluaciones.map((e, i) => `
         <tr>
           <td>${i + 1}</td>
-          <td>${e.nombre}</td>
+          <td>${escapeHtml(e.nombre)}</td>
           <td><span class="badge badge--info">ISO ${e.isoVersion}</span></td>
-          <td>${e.creada}</td>
-          <td>${e.actualizacion}</td>
-          <td><span class="badge badge--${e.estado === 'completada' ? 'complete' : 'pending'}">${e.estado}</span></td>
-          <td>${e.resultado !== null ? `<strong>${e.resultado}%</strong>` : '—'}</td>
+          <td>${escapeHtml(e.creada)}</td>
+          <td>${escapeHtml(e.actualizacion)}</td>
+          <td><span class="badge badge--${e.estado === 'completada' ? 'complete' : 'pending'}">${escapeHtml(e.estado)}</span></td>
+          <td>${e.resultado !== null && e.resultado !== undefined ? `<strong>${escapeHtml(e.resultado)}%</strong>` : '—'}</td>
         </tr>
       `).join('');
     } catch (error) {

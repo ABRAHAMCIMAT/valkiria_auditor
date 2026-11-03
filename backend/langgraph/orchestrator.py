@@ -36,8 +36,8 @@ from backend.observability.flow_tracker import FlowTracker
 # ─────────────────────────────────────────────────────────────────────────────
 
 REGION = os.environ.get("AWS_REGION", "us-east-1")
-PRIMARY_MODEL_ID = os.environ.get("PRIMARY_MODEL_ID", "openai.gpt-oss-120b-1:0")
-FAST_MODEL_ID = os.environ.get("FAST_MODEL_ID", "qwen.qwen3-32b-v1:0")
+PRIMARY_MODEL_ID = os.environ.get("PRIMARY_MODEL_ID", "us.anthropic.claude-sonnet-4-5-20250929-v1:0")
+FAST_MODEL_ID = os.environ.get("FAST_MODEL_ID", "us.anthropic.claude-sonnet-4-5-20250929-v1:0")
 
 
 def _get_llm(model_id: str = None, temperature: float = 0.2) -> ChatBedrock:
