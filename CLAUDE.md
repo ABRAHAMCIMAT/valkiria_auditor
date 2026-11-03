@@ -51,7 +51,7 @@ Specialized agents coordinated by a consolidator follow the "Agents as Tools" pa
 
 ### AWS Services
 
-- **Amazon Bedrock** — Foundation models: Claude Sonnet 4.5 (parsing/generation), Titan Text Embeddings V2 (embeddings)
+- **Amazon Bedrock** — Foundation models: Claude Sonnet 4.5 (agent generation), Nova Pro (ingestion parsing and RAG validation), Titan Text Embeddings V2 (embeddings)
 - **Bedrock Knowledge Bases** — Managed RAG with semantic chunking and metadata filtering
 - **S3 Vectors** — Vector store (cosine distance, 1024d float32)
 - **S3** — Document storage (`raw/`, `processed/`, `eda_results/`, `validation/`, `fine-tuning/`)
