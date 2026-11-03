@@ -52,17 +52,19 @@ const AuditoriaDetallePage = {
           <h2 class="detail-card__title">Información General</h2>
           <dl style="display:grid; grid-template-columns: auto 1fr; gap: 0.5rem 1rem; font-size: 0.9rem;">
             <dt style="font-weight:600;">Nombre:</dt>
-            <dd>${a.nombre}</dd>
+            <dd>${escapeHtml(a.nombre)}</dd>
             <dt style="font-weight:600;">Versión ISO:</dt>
             <dd><span class="badge badge--info">ISO 27001:${a.isoVersion}</span></dd>
             <dt style="font-weight:600;">Framework:</dt>
-            <dd>${a.framework}</dd>
+            <dd>${escapeHtml(a.framework)}</dd>
             <dt style="font-weight:600;">Estado:</dt>
-            <dd><span class="badge badge--${a.estado === 'completada' ? 'complete' : 'pending'}">${a.estado}</span></dd>
+            <dd><span class="badge badge--${a.estado === 'completada' ? 'complete' : 'pending'}">${escapeHtml(a.estado)}</span></dd>
             <dt style="font-weight:600;">Creada:</dt>
-            <dd>${a.creada}</dd>
+            <dd>${escapeHtml(a.creada)}</dd>
             <dt style="font-weight:600;">Última actualización:</dt>
-            <dd>${a.actualizacion}</dd>
+            <dd>${escapeHtml(a.actualizacion)}</dd>
+            ${a.error ? `<dt style="font-weight:600;">Error:</dt><dd>${escapeHtml(a.error)}</dd>` : ''}
+            ${a.report_url && /^https:/.test(a.report_url) ? `<dt style="font-weight:600;">Reporte:</dt><dd><a href="${escapeHtml(a.report_url)}" target="_blank" rel="noopener">Descargar reporte consolidado</a></dd>` : ''}
           </dl>
         </div>
 
@@ -157,8 +159,8 @@ const AuditoriaDetallePage = {
               ${a.hallazgos.map((h, i) => `
                 <tr>
                   <td>${i + 1}</td>
-                  <td><strong>${h.control}</strong></td>
-                  <td>${h.descripcion}</td>
+                  <td><strong>${escapeHtml(h.control)}</strong></td>
+                  <td>${escapeHtml(h.descripcion)}</td>
                   <td><span class="badge badge--${h.severidad === 'alta' ? 'high' : h.severidad === 'media' ? 'medium' : 'low'}">${h.severidad}</span></td>
                   <td>${this.formatEstadoHallazgo(h.estado)}</td>
                 </tr>

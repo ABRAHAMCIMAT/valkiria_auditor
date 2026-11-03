@@ -2,9 +2,15 @@
  * API Client para Auditor Lead
  * Maneja la comunicación con el backend y datos mock para demo
  */
+// Los datos vienen del usuario: se escapan antes de insertarlos como HTML
+function escapeHtml(value) {
+  const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+  return String(value ?? '').replace(/[&<>"']/g, c => entities[c]);
+}
+
 const API = (() => {
   // Configuración del endpoint base (vacío = modo demo con datos mock)
-  const BASE_URL = window.__API_BASE_URL__ || '';
+  const BASE_URL = (window.__API_BASE_URL__ || '').replace(/\/$/, '');
 
   // ===== Datos Mock =====
   const mockAuditorias = [
@@ -126,10 +132,22 @@ const API = (() => {
     }
 
     if (!response.ok) {
-      throw new Error(`Error ${response.status}: ${response.statusText}`);
+      const detail = await response.json().catch(() => ({}));
+      throw new Error(detail.error || `Error ${response.status}: ${response.statusText}`);
     }
 
     return response.json();
+  }
+
+  // Sube un archivo a S3 con una URL presigned. Los headers vienen firmados por
+  // el backend y S3 rechaza la subida si no se envían exactamente iguales.
+  async function uploadToS3(url, file, headers) {
+    if (!BASE_URL) return;
+
+    const response = await fetch(url, { method: 'PUT', headers, body: file });
+    if (!response.ok) {
+      throw new Error(`No se pudo subir ${file.name}`);
+    }
   }
 
   function mockResponse(method, path, body) {
@@ -165,6 +183,8 @@ const API = (() => {
           };
           mockEvaluaciones.push(newEval);
           resolve(newEval);
+        } else if (path.includes('/sast/upload-url')) {
+          resolve({ uploadUrl: '', headers: {} });
         } else if (path.includes('/audit/strands') || path.includes('/audit/langgraph') || path.includes('/audit/crewai')) {
           resolve({ status: 'ejecutando', agente: path.split('/').pop(), mensaje: 'Auditoría ISO 27001:2022 iniciada' });
         } else if (path.includes('/audit/comp2013')) {
@@ -196,15 +216,31 @@ const API = (() => {
     },
 
     // Ejecutar auditoría según versión ISO
-    ejecutarAuditoria(isoVersion, framework = 'strands') {
+    // La ejecución es asíncrona: el estado se consulta en la auditoría
+    ejecutarAuditoria(auditId, isoVersion, framework = 'strands') {
       if (isoVersion === '2013') {
-        return request('POST', '/audit/comp2013');
+        return request('POST', '/audit/comp2013', { audit_id: auditId });
       }
       // ISO 2022 - seleccionar framework
-      return request('POST', `/audit/${framework}`);
+      return request('POST', `/audit/${framework}`, { audit_id: auditId });
+    },
+
+    // Sube los archivos con las URLs que devuelve createAuditoria
+    subirArchivos(uploads, files) {
+      return Promise.all(uploads.map((upload, i) => uploadToS3(upload.url, files[i], upload.headers)));
+    },
+
+    // Sube el .zip de código, que inicia el análisis SAST de la evaluación
+    async subirCodigoSast(evaluationId, zip) {
+      const upload = await request('POST', '/sast/upload-url', { evaluationId });
+      return uploadToS3(upload.uploadUrl, zip, upload.headers);
     },
 
     // Evaluaciones
+    getEvaluacion(id) {
+      return request('GET', `/evaluaciones/${id}`);
+    },
+
     getEvaluaciones() {
       return request('GET', '/evaluaciones');
     },

@@ -36,10 +36,10 @@ Usuario/API Gateway
 
 | Primitiva | Propósito | Estado |
 |-----------|-----------|--------|
-| **Runtime** | Despliegue de cada agente como endpoint serverless | Configurado (`.bedrock_agentcore.yaml`) |
-| **Memory (STM)** | Persistencia de conversación dentro de una sesión de auditoría | Preparado, activar post-despliegue |
-| **Memory (LTM)** | Conocimiento a largo plazo de hallazgos previos y contexto organizacional | Disponible vía estrategias semánticas |
-| **Gateway** | Enrutamiento MCP para herramientas Lambda (RAG, DynamoDB, S3) | Estructura preparada, requiere creación de recurso |
+| **Runtime** | Despliegue de cada agente como endpoint serverless | Definido en CDK, sin desplegar |
+| **Memory (STM)** | Persistencia de conversación dentro de una sesión de auditoría | Definido en CDK, solo en el orquestador |
+| **Memory (LTM)** | Conocimiento a largo plazo de hallazgos previos y contexto organizacional | Definido en CDK, aislado por tenant (`actor_id`) |
+| **Gateway** | Acceso MCP de solo lectura al Knowledge Base | Definido en CDK, sin desplegar |
 
 ## 3. Definición de Agentes
 
@@ -204,95 +204,54 @@ Cada agente tiene un system prompt especializado que define:
 
 ## 5. Despliegue
 
+El despliegue es infraestructura como código (`backend/cdk/lib/agentcore-stack.ts`), con los recursos nativos de CloudFormation para AgentCore. No usa `bedrock-agentcore-starter-toolkit`, que AWS ya no soporta.
+
 ### 5.1 Pre-requisitos
 
 ```bash
-pip install bedrock-agentcore-starter-toolkit
-aws configure  # Credenciales AWS con permisos para Bedrock, S3, DynamoDB
+aws configure          # Credenciales con permisos para CloudFormation, ECR, Bedrock, S3 y DynamoDB
+docker info            # Las imágenes ARM64 se construyen localmente
 ```
 
-### 5.2 Crear Recursos de Memoria (una sola vez)
+La cuenta necesita acceso habilitado en Bedrock a los modelos asignados y el Knowledge Base `iso27001-compliance-kb` en estado ACTIVE.
+
+### 5.2 Verificación previa
 
 ```bash
-agentcore memory create audit_system_memory \
-    --description "Memory for ISO 27001 audit multi-agent system" \
-    --strategies '[
-        {"summaryMemoryStrategy": {"name": "AuditSessionSummary", "namespaces": ["/summaries/{actorId}/{sessionId}"]}},
-        {"semanticMemoryStrategy": {"name": "AuditFacts", "namespaces": ["/facts/{actorId}"]}}
-    ]' \
-    --region us-east-1 \
-    --wait
+python backend/agentcore/preflight.py --knowledge-base-id <KB_ID>
 ```
 
-### 5.3 Despliegue por Agente
+Comprueba credenciales, acceso a modelos, **invocación de herramientas en cada modelo** y el Knowledge Base. El orquestador usa Claude Sonnet 4.5, que depende de la invocación de herramientas. Para cambiar de modelo usa `-c orchestratorModelId=<id>`.
+
+Claude Sonnet 4.5 está deprecado: su retiro en la API de Claude es el 30 de noviembre de 2026. Bedrock define su propio calendario, así que hay que confirmarlo antes de desplegar.
+
+### 5.3 Despliegue completo
 
 ```bash
-# Desde cada directorio de agente:
-cd backend/agentcore/planning_agent
-agentcore configure --entrypoint src/main.py --non-interactive
-agentcore launch
-
-# Repetir para cada agente:
-cd ../evidence_agent && agentcore configure --entrypoint src/main.py --non-interactive && agentcore launch
-cd ../organizational_controls_agent && agentcore configure --entrypoint src/main.py --non-interactive && agentcore launch
-cd ../people_controls_agent && agentcore configure --entrypoint src/main.py --non-interactive && agentcore launch
-cd ../physical_controls_agent && agentcore configure --entrypoint src/main.py --non-interactive && agentcore launch
-cd ../technological_controls_agent && agentcore configure --entrypoint src/main.py --non-interactive && agentcore launch
-cd ../consolidation_agent && agentcore configure --entrypoint src/main.py --non-interactive && agentcore launch
+./backend/deploy.sh
 ```
 
-### 5.4 Desarrollo Local
+Orden de los stacks: Frontend, AgentCore (memoria, 7 runtimes, Gateway), SAST y Backend (API, Lambdas, sitio).
+
+### 5.4 Empaquetado
+
+Todas las imágenes salen de `backend/agentcore/Dockerfile`, seleccionando el agente con `--build-arg AGENT_DIR=<agente>`. El contexto de build es `backend/agentcore/` para que `shared/` entre en cada imagen.
+
+### 5.5 Desarrollo Local
 
 ```bash
-# Terminal 1: Planning Agent
-cd backend/agentcore/planning_agent && agentcore dev --port 8081
-
-# Terminal 2: Evidence Agent
-cd backend/agentcore/evidence_agent && agentcore dev --port 8082
-
-# Terminal 3: Organizational Controls Agent
-cd backend/agentcore/organizational_controls_agent && agentcore dev --port 8083
-
-# Terminal 4: People Controls Agent
-cd backend/agentcore/people_controls_agent && agentcore dev --port 8084
-
-# Terminal 5: Physical Controls Agent
-cd backend/agentcore/physical_controls_agent && agentcore dev --port 8085
-
-# Terminal 6: Technological Controls Agent
-cd backend/agentcore/technological_controls_agent && agentcore dev --port 8086
-
-# Terminal 7: Consolidation Agent (Orchestrator)
-cd backend/agentcore/consolidation_agent && agentcore dev --port 8080
-
-# Test from another terminal:
-agentcore invoke --dev --port 8080 '{
-    "prompt": "Realiza una auditoría ISO 27001:2022 completa para la organización ACME Corp, una empresa de tecnología con 200 empleados que maneja datos financieros sensibles.",
-    "session_id": "audit_001",
-    "actor_id": "auditor_david"
-}'
+# Puertos de cada sub-agente, definidos en shared/invocation.py:
+# 8081 planning, 8082 evidence, 8083 organizational, 8084 people, 8085 physical, 8086 technological
+export LOCAL_DEV=1
 ```
 
-## 6. Configuración de Gateway (Opcional — Fase 2)
+`backend/tests/integration/test_agentcore_local_flow.py` levanta el flujo completo por HTTP sin AWS, reemplazando solo el LLM.
 
-Para exponer herramientas Lambda como endpoints MCP centralizados:
+## 6. Configuración de Gateway
 
-```bash
-# Crear gateway
-agentcore gateway create-mcp-gateway \
-    --name AuditGateway \
-    --region us-east-1 \
-    --enable_semantic_search
+El stack crea un MCP Gateway con autorización `AWS_IAM` y un target Lambda (`gateway_tools/handler.py`) que expone `query_knowledge_base` en modo de solo lectura, para clientes MCP externos.
 
-# Agregar targets Lambda (una por herramienta expuesta)
-agentcore gateway create-mcp-gateway-target \
-    --gateway-arn <arn> \
-    --gateway-url <url> \
-    --role-arn <role> \
-    --name RAGQueryTarget \
-    --target-type lambda \
-    --target-payload "$(cat gateway_targets/rag_query.json)"
-```
+Los agentes siguen usando sus herramientas en proceso (`shared/tools/`), con los permisos de su rol: no pasan por el Gateway. Moverlos implica agregar un cliente MCP con firma SigV4 a cada agente y solo aporta valor si hay más consumidores de esas herramientas.
 
 ## 7. Cobertura de Controles ISO 27001:2022
 
@@ -350,14 +309,13 @@ agentcore gateway create-mcp-gateway-target \
 - **Sin secrets en código:** Toda configuración sensible vía variables de entorno
 - **Audit trail:** Todos los hallazgos se persisten en DynamoDB con timestamps y actor
 
-## 10. Próximos Pasos
+## 10. Estado
 
 1. ✅ Estructura de agentes definida
-2. ✅ Physical Controls Agent (A.7) implementado
-3. ⬜ Crear recurso de memoria AgentCore (`agentcore memory create`)
-4. ⬜ Desplegar agentes individualmente y validar
-5. ⬜ Configurar endpoints de producción en el Orchestrator
-6. ⬜ Crear Gateway MCP para herramientas centralizadas
-7. ⬜ Activar memoria STM/LTM post-despliegue exitoso
-8. ⬜ Integrar con API Gateway del frontend
-9. ⬜ Tests de integración end-to-end
+2. ✅ Los 7 agentes construyen imagen e importan con dependencias resolubles
+3. ✅ Invocación entre agentes con `InvokeAgentRuntime` (SigV4), incluido A.7
+4. ✅ Memoria STM/LTM y Gateway MCP definidos en CDK
+5. ✅ API Gateway con Cognito conectada al frontend, con ejecución asíncrona
+6. ✅ Prueba de integración local del flujo completo
+7. ⬜ Desplegar en una cuenta de AWS (`backend/deploy.sh`)
+8. ⬜ Ejecutar la prueba end-to-end sobre el despliegue (`backend/tests/e2e/`)

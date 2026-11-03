@@ -12,7 +12,7 @@
 #   - Node.js 18+ installed
 #   - Python 3.12+ installed
 #   - CDK CLI: npm install -g aws-cdk@2.200.0
-#   - AgentCore toolkit: pip install bedrock-agentcore-starter-toolkit
+#   - Docker running (agent and Lambda images are built locally for ARM64)
 #
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -52,11 +52,8 @@ python --version || python3 --version || { echo "ERROR: Python not installed."; 
 echo "[4/5] Checking CDK..."
 npx cdk --version || { echo "ERROR: CDK not available. Run: npm install -g aws-cdk@2.200.0"; exit 1; }
 
-echo "[5/5] Checking AgentCore toolkit..."
-agentcore --version 2>/dev/null || {
-    echo "WARNING: AgentCore toolkit not installed. Installing..."
-    pip install bedrock-agentcore-starter-toolkit
-}
+echo "[5/5] Checking Docker (builds the agent and Lambda images)..."
+docker info > /dev/null || { echo "ERROR: Docker is not running."; exit 1; }
 
 echo "✓ All prerequisites verified."
 
@@ -114,122 +111,72 @@ else
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
-# PHASE 5: Create AgentCore Memory Resource
+# PHASE 5: Preflight (model access, tool calling, knowledge base)
 # ─────────────────────────────────────────────────────────────────────────────
 echo ""
-echo "──── Phase 5: Creating AgentCore Memory ────"
+echo "──── Phase 5: Preflight ────"
 
-MEMORY_STRATEGIES='[{"summaryMemoryStrategy":{"name":"AuditSessionSummary","namespaces":["/summaries/{actorId}/{sessionId}"]}},{"semanticMemoryStrategy":{"name":"OrganizationalFacts","namespaces":["/facts/{actorId}"]}},{"userPreferenceMemoryStrategy":{"name":"AuditorPreferences","namespaces":["/preferences/{actorId}"]}}]'
-
-MEMORY_ID=$(agentcore memory list --region "$REGION" 2>/dev/null | grep "iso27001_audit_memory" | awk '{print $1}' || echo "")
-
-if [ -z "$MEMORY_ID" ]; then
-    echo "  Creating memory resource..."
-    agentcore memory create iso27001_audit_memory \
-        --description "Memory for ISO 27001 multi-agent audit system" \
-        --strategies "$MEMORY_STRATEGIES" \
-        --region "$REGION" \
-        --wait
-    MEMORY_ID=$(agentcore memory list --region "$REGION" 2>/dev/null | grep "iso27001_audit_memory" | awk '{print $1}' || echo "")
-    echo "  ✓ Memory created: $MEMORY_ID"
-else
-    echo "  Memory already exists: $MEMORY_ID"
-fi
-
-# ─────────────────────────────────────────────────────────────────────────────
-# PHASE 6: Build Lambda Layer
-# ─────────────────────────────────────────────────────────────────────────────
-echo ""
-echo "──── Phase 6: Building Lambda Layer ────"
-
-cd "$SCRIPT_DIR/layers/shared"
-rm -rf python
-mkdir -p python/lib/python3.12/site-packages
-
-echo "  Installing dependencies (this may take a minute)..."
-pip install -r requirements.txt \
-    -t python/lib/python3.12/site-packages \
-    --no-cache-dir --quiet \
-    --platform manylinux2014_x86_64 \
-    --only-binary=:all: 2>/dev/null || \
-pip install -r requirements.txt \
-    -t python/lib/python3.12/site-packages \
-    --no-cache-dir --quiet
-
-LAYER_SIZE=$(du -sh python 2>/dev/null | cut -f1)
-echo "  ✓ Layer built: $LAYER_SIZE"
-
-# ─────────────────────────────────────────────────────────────────────────────
-# PHASE 7: Deploy Backend Stack
-# ─────────────────────────────────────────────────────────────────────────────
-echo ""
-echo "──── Phase 7: Deploying Backend Stack ────"
-
-cd "$SCRIPT_DIR/cdk"
-npm install --silent
-
-echo "  Synthesizing..."
-npx cdk synth --quiet
-
-echo "  Deploying..."
-npx cdk deploy --require-approval never
-
-# Capture API endpoint
-API_ENDPOINT=$(aws cloudformation describe-stacks \
-    --stack-name Iso27001BackendStack \
-    --query "Stacks[0].Outputs[?OutputKey=='ApiEndpoint'].OutputValue" \
-    --output text --region "$REGION" 2>/dev/null || echo "")
-
-echo "  ✓ Backend Stack deployed."
-echo "  API Endpoint: $API_ENDPOINT"
-
-# ─────────────────────────────────────────────────────────────────────────────
-# PHASE 8: Configure Environment Variables
-# ─────────────────────────────────────────────────────────────────────────────
-echo ""
-echo "──── Phase 8: Configuring Lambda Environment Variables ────"
-
-# Get Knowledge Base ID (from Bedrock, if available)
 KB_ID=$(aws bedrock-agent list-knowledge-bases --region "$REGION" \
     --query "knowledgeBaseSummaries[?name=='iso27001-compliance-kb'].knowledgeBaseId" \
     --output text 2>/dev/null || echo "")
 
-if [ -n "$KB_ID" ] && [ "$KB_ID" != "None" ]; then
-    echo "  Knowledge Base ID: $KB_ID"
-else
-    echo "  WARNING: Knowledge Base not found. Set KNOWLEDGE_BASE_ID manually after ingestion completes."
-    KB_ID=""
+if [ -z "$KB_ID" ] || [ "$KB_ID" = "None" ]; then
+    echo "ERROR: Knowledge Base iso27001-compliance-kb not found. Wait for the ingestion pipeline and run this again."
+    exit 1
 fi
+echo "  Knowledge Base ID: $KB_ID"
 
-LAMBDAS=("iso27001-strands-orchestrator" "iso27001-langgraph-orchestrator" "iso27001-crewai-orchestrator")
+python3 "$SCRIPT_DIR/agentcore/preflight.py" --knowledge-base-id "$KB_ID" --region "$REGION"
 
-for LAMBDA_NAME in "${LAMBDAS[@]}"; do
-    echo "  Updating $LAMBDA_NAME..."
+# ─────────────────────────────────────────────────────────────────────────────
+# PHASE 6: Deploy Frontend and AgentCore (Memory, Runtimes, Gateway)
+# ─────────────────────────────────────────────────────────────────────────────
+echo ""
+echo "──── Phase 6: Deploying Frontend and AgentCore stacks ────"
 
-    # Get current environment
-    CURRENT_ENV=$(aws lambda get-function-configuration \
-        --function-name "$LAMBDA_NAME" \
-        --query "Environment.Variables" \
-        --output json --region "$REGION" 2>/dev/null || echo "{}")
+cd "$SCRIPT_DIR/cdk"
+npm install --silent
+npx cdk deploy Iso27001FrontendStack Iso27001AgentCoreStack \
+    -c knowledgeBaseId="$KB_ID" --require-approval never --exclusively
 
-    # Update with KB_ID and MEMORY_ID
-    if [ -n "$KB_ID" ] && [ "$KB_ID" != "None" ]; then
-        UPDATED_ENV=$(echo "$CURRENT_ENV" | python -c "
-import sys, json
-env = json.load(sys.stdin)
-env['KNOWLEDGE_BASE_ID'] = '$KB_ID'
-env['AGENTCORE_MEMORY_ID'] = '$MEMORY_ID'
-print(json.dumps({'Variables': env}))
-")
-        aws lambda update-function-configuration \
-            --function-name "$LAMBDA_NAME" \
-            --environment "$UPDATED_ENV" \
-            --region "$REGION" \
-            --no-cli-pager > /dev/null 2>&1 || true
-    fi
-done
+stack_output() {
+    aws cloudformation describe-stacks --stack-name "$1" --region "$REGION" \
+        --query "Stacks[0].Outputs[?OutputKey=='$2'].OutputValue" --output text
+}
 
-echo "  ✓ Environment variables configured."
+SITE_URL=$(stack_output Iso27001FrontendStack SiteUrl)
+MEMORY_ID=$(stack_output Iso27001AgentCoreStack MemoryId)
+echo "  Site:   $SITE_URL"
+echo "  Memory: $MEMORY_ID"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PHASE 7: Deploy SAST Pipeline
+# ─────────────────────────────────────────────────────────────────────────────
+echo ""
+echo "──── Phase 7: Deploying SAST Pipeline stack ────"
+
+cd "$PROJECT_ROOT/deliverables/pipeline/cdk"
+npm install --silent
+npx cdk deploy -c knowledgeBaseId="$KB_ID" -c allowedOrigin="$SITE_URL" --require-approval never
+
+SAST_UPLOAD_ARN=$(stack_output Iso27001SastPipelineStack UploadLambdaArn)
+SAST_RESULTS_BUCKET=$(stack_output Iso27001SastPipelineStack ResultsBucketName)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PHASE 8: Deploy Backend Stack (API, framework Lambdas, site assets)
+# ─────────────────────────────────────────────────────────────────────────────
+echo ""
+echo "──── Phase 8: Deploying Backend Stack ────"
+
+cd "$SCRIPT_DIR/cdk"
+npx cdk deploy Iso27001BackendStack --exclusively \
+    -c knowledgeBaseId="$KB_ID" \
+    -c sastUploadFunctionArn="$SAST_UPLOAD_ARN" \
+    -c sastResultsBucketName="$SAST_RESULTS_BUCKET" \
+    --require-approval never
+
+API_ENDPOINT=$(stack_output Iso27001BackendStack ApiEndpoint)
+echo "  ✓ API Endpoint: $API_ENDPOINT"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PHASE 9: Deploy CloudWatch Alarms
@@ -251,23 +198,13 @@ print('  ✓ All CloudWatch alarms created.')
 echo ""
 echo "──── Phase 10: Validation ────"
 
-if [ -n "$API_ENDPOINT" ]; then
-    echo "  Testing Strands endpoint..."
-    RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
-        -X POST "${API_ENDPOINT}audit/strands" \
-        -H "Content-Type: application/json" \
-        -d '{"organization_context":"Validation test - ACME Corp, 50 employees, tech startup","audit_type":"internal"}' \
-        --max-time 30 2>/dev/null || echo "timeout")
-
-    if [ "$RESPONSE" = "200" ]; then
-        echo "  ✓ Strands orchestrator responding (HTTP 200)"
-    elif [ "$RESPONSE" = "timeout" ]; then
-        echo "  ⏳ Strands orchestrator timed out (expected for first cold start, try again)"
-    else
-        echo "  ⚠ Strands orchestrator returned HTTP $RESPONSE"
-    fi
+# Audits require a signed-in user: an anonymous call must be rejected
+RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "${API_ENDPOINT}auditorias" --max-time 30 || echo "timeout")
+if [ "$RESPONSE" = "401" ]; then
+    echo "  ✓ API rejects anonymous requests (HTTP 401)"
 else
-    echo "  WARNING: API endpoint not available. Check CloudFormation outputs."
+    echo "  ERROR: anonymous request returned HTTP $RESPONSE, expected 401"
+    exit 1
 fi
 
 # Verify S3 metrics prefix exists
@@ -289,14 +226,11 @@ echo ""
 echo "  Resources:"
 echo "    API Endpoint:     ${API_ENDPOINT:-'(check CloudFormation outputs)'}"
 echo "    S3 Bucket:        ${BUCKET_NAME:-'(check CloudFormation outputs)'}"
-echo "    Knowledge Base:   ${KB_ID:-'(pending ingestion pipeline completion)'}"
-echo "    Memory ID:        ${MEMORY_ID:-'(check agentcore memory list)'}"
+echo "    Knowledge Base:   ${KB_ID}"
+echo "    Memory ID:        ${MEMORY_ID:-'(check AgentCore stack outputs)'}"
 echo "    Region:           $REGION"
 echo ""
-echo "  Endpoints:"
-echo "    POST ${API_ENDPOINT}audit/strands"
-echo "    POST ${API_ENDPOINT}audit/langgraph"
-echo "    POST ${API_ENDPOINT}audit/crewai"
+echo "  Site:             ${SITE_URL}"
 echo ""
 echo "  Metrics stored at:"
 echo "    s3://$BUCKET_NAME/metrics/"
@@ -305,11 +239,9 @@ echo "  CloudWatch Dashboard:"
 echo "    ISO27001-Backend-Overview"
 echo ""
 echo "  Next steps:"
-echo "    1. If KB_ID is empty, wait for ingestion pipeline then re-run Phase 8"
-echo "    2. Subscribe to SNS topic for alerts:"
+echo "    1. Subscribe to SNS topic for alerts:"
 echo "       aws sns subscribe --topic-arn <AlertsTopicArn> --protocol email --notification-endpoint your@email.com"
-echo "    3. Test a full audit:"
-echo "       curl -X POST ${API_ENDPOINT}audit/strands -H 'Content-Type: application/json' \\"
-echo "         -d '{\"organization_context\":\"Your org description\",\"audit_type\":\"internal\"}'"
+echo "    2. Create a user in the Cognito pool, assign it a group (its tenant) and sign in"
+echo "    3. Run the end-to-end test (real audit, real cost): backend/tests/e2e/test_deployed_audit.py"
 echo ""
 echo "═══════════════════════════════════════════════════════════════════"

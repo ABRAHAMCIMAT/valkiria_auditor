@@ -221,8 +221,9 @@ const AuditoriasPage = {
           archivos: this.uploadedFiles.map(f => ({ name: f.name, size: f.size, type: f.type })),
         };
 
-        await API.createAuditoria(auditData);
-        await API.ejecutarAuditoria(isoVersion, framework);
+        const auditoria = await API.createAuditoria(auditData);
+        await API.subirArchivos(auditoria.uploads || [], this.uploadedFiles);
+        await API.ejecutarAuditoria(auditoria.id, isoVersion, framework);
 
         this.closeModal(modal);
         form.reset();
@@ -232,7 +233,7 @@ const AuditoriasPage = {
         await this.loadData(tbody, filterIso.value);
         App.showToast('Auditoría creada y en ejecución', 'success');
       } catch (error) {
-        App.showToast('Error al crear auditoría', 'error');
+        App.showToast(error.message || 'Error al crear auditoría', 'error');
       } finally {
         btn.disabled = false;
         btn.textContent = 'Crear y ejecutar auditoría';
@@ -355,11 +356,11 @@ const AuditoriasPage = {
       tbody.innerHTML = auditorias.map((a, i) => `
         <tr>
           <td>${i + 1}</td>
-          <td><a href="#/auditorias/${a.id}" class="table__link">${a.nombre}</a></td>
+          <td><a href="#/auditorias/${a.id}" class="table__link">${escapeHtml(a.nombre)}</a></td>
           <td><span class="badge badge--info">ISO ${a.isoVersion}</span></td>
-          <td>${a.archivos ? `<span class="badge badge--complete">${a.archivos.length} archivo${a.archivos.length > 1 ? 's' : ''}</span>` : '<span style="opacity:0.5;">—</span>'}</td>
-          <td>${a.creada}</td>
-          <td>${a.completada || '<span class="badge badge--pending">Pendiente</span>'}</td>
+          <td>${a.archivos && a.archivos.length ? `<span class="badge badge--complete">${a.archivos.length} archivo${a.archivos.length > 1 ? 's' : ''}</span>` : '<span style="opacity:0.5;">—</span>'}</td>
+          <td>${escapeHtml(a.creada)}</td>
+          <td>${a.completada ? escapeHtml(a.completada) : `<span class="badge badge--pending">${escapeHtml(a.estado)}</span>`}</td>
           <td>
             <div class="table__actions">
               <button class="table__action-btn" onclick="location.hash='#/auditorias/${a.id}'" title="Ver detalle" aria-label="Ver detalle">👁️</button>

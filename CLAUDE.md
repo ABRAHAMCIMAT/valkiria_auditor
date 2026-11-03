@@ -47,7 +47,7 @@ Specialized agents coordinated by a consolidator follow the "Agents as Tools" pa
 | 4 | Controles de Personas (A.6) | Nova Pro | Ministral 3 8B | Evaluate 8 people controls |
 | 5 | Controles Físicos (A.7) | Nova Pro | Ministral 3 8B | Evaluate 14 physical and environmental controls |
 | 6 | Controles Tecnológicos (A.8) | Nova Pro | Ministral 3 8B | Evaluate 34 technological controls |
-| 7 | Consolidación (Orchestrator) | GPT-OSS-120B (OpenAI vía Bedrock) | DeepSeek-R1-0528-Qwen3-8B | Verify consistency, consolidate, generate final report |
+| 7 | Consolidación (Orchestrator) | Claude Sonnet 4.5 (vía Bedrock) | DeepSeek-R1-0528-Qwen3-8B | Verify consistency, consolidate, generate final report |
 
 ### AWS Services
 

@@ -6,13 +6,24 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as codepipeline from 'aws-cdk-lib/aws-codepipeline';
 import * as codepipeline_actions from 'aws-cdk-lib/aws-codepipeline-actions';
 import * as codebuild from 'aws-cdk-lib/aws-codebuild';
-import * as s3n from 'aws-cdk-lib/aws-s3-notifications';
+import * as cloudtrail from 'aws-cdk-lib/aws-cloudtrail';
+import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as events_targets from 'aws-cdk-lib/aws-events-targets';
 import * as logs from 'aws-cdk-lib/aws-logs';
+import * as fs from 'fs';
 import * as path from 'path';
+
+const UPLOAD_KEY = 'uploads/application.zip';
+const SEMGREP_VERSION = '1.183.0';
 
 export class SastPipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+
+    const allowedOrigin: string = this.node.tryGetContext('allowedOrigin') || '*';
+    const knowledgeBaseId: string = this.node.tryGetContext('knowledgeBaseId') || '';
+    const auditsTableName: string = this.node.tryGetContext('auditsTableName') || 'ValkiriaAudits';
+    const auditsTable = dynamodb.Table.fromTableName(this, 'AuditsTable', auditsTableName);
 
     // ─────────────────────────────────────────────
     // 1. S3 BUCKET — Source for .zip uploads from frontend
@@ -32,8 +43,8 @@ export class SastPipelineStack extends cdk.Stack {
       ],
       cors: [
         {
-          allowedMethods: [s3.HttpMethods.PUT, s3.HttpMethods.POST],
-          allowedOrigins: ['*'],
+          allowedMethods: [s3.HttpMethods.PUT],
+          allowedOrigins: [allowedOrigin],
           allowedHeaders: ['*'],
           maxAge: 3600,
         },
@@ -51,10 +62,26 @@ export class SastPipelineStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.RETAIN,
     });
 
+    // S3 event triggers for CodePipeline are delivered through CloudTrail data
+    // events: without a trail the pipeline never starts on upload.
+    const sourceTrail = new cloudtrail.Trail(this, 'SastSourceTrail', {
+      trailName: 'iso27001-sast-source-events',
+      isMultiRegionTrail: false,
+      includeGlobalServiceEvents: false,
+    });
+    sourceTrail.addS3EventSelector(
+      [{ bucket: sourceBucket, objectPrefix: UPLOAD_KEY }],
+      { readWriteType: cloudtrail.ReadWriteType.WRITE_ONLY, includeManagementEvents: false },
+    );
+
     // ─────────────────────────────────────────────
     // 3. CODEBUILD — SAST Analysis Project
     // Unzips the uploaded code and runs Semgrep SAST
     // ─────────────────────────────────────────────
+    const consolidateScript = fs
+      .readFileSync(path.join(__dirname, '../../scripts/consolidate_sast.py'))
+      .toString('base64');
+
     const sastBuildProject = new codebuild.PipelineProject(this, 'SastBuildProject', {
       projectName: 'iso27001-sast-analysis',
       description: 'Unzips uploaded application code and runs SAST (Semgrep)',
@@ -79,6 +106,9 @@ export class SastPipelineStack extends cdk.Stack {
       },
       buildSpec: codebuild.BuildSpec.fromObject({
         version: '0.2',
+        env: {
+          'exported-variables': ['REPORT_KEY'],
+        },
         phases: {
           install: {
             'runtime-versions': {
@@ -86,63 +116,39 @@ export class SastPipelineStack extends cdk.Stack {
             },
             commands: [
               'echo "[INFO] Installing SAST tools..."',
-              'pip install semgrep',
+              `pip install semgrep==${SEMGREP_VERSION}`,
             ],
           },
           pre_build: {
             commands: [
-              'echo "[INFO] Preparing source code for analysis..."',
               'echo "[INFO] Source files from S3 .zip already extracted by CodePipeline"',
               'ls -la',
-              'echo "[INFO] Source code ready for SAST analysis"',
+              // The source artifact is the audited code, so the script travels in the buildspec
+              `echo ${consolidateScript} | base64 -d > /tmp/consolidate_sast.py`,
             ],
           },
           build: {
             commands: [
+              // One run with both rulesets avoids counting overlapping rules twice.
+              // Semgrep exits non-zero only on real errors, which must fail this stage.
               'echo "[INFO] Running Semgrep SAST analysis..."',
-              'semgrep scan --config=auto --json --output=semgrep-results.json . || true',
-              'echo "[INFO] Running Semgrep with OWASP rules..."',
-              'semgrep scan --config=p/owasp-top-ten --json --output=semgrep-owasp.json . || true',
-              'echo "[INFO] Running Semgrep with security-audit rules..."',
-              'semgrep scan --config=p/security-audit --json --output=semgrep-security.json . || true',
+              'semgrep scan --metrics=off --config=p/owasp-top-ten --config=p/security-audit --json --output=/tmp/semgrep-results.json .',
               'echo "[INFO] SAST analysis complete"',
             ],
           },
           post_build: {
             commands: [
+              // post_build runs even after a failed build: stop before publishing anything
+              'if [ "$CODEBUILD_BUILD_SUCCEEDING" != "1" ]; then echo "[ERROR] SAST scan failed"; exit 1; fi',
               'echo "[INFO] Consolidating SAST results..."',
-              'python -c "' +
-                'import json, os, datetime;' +
-                'results = {};' +
-                'for f in [\'semgrep-results.json\', \'semgrep-owasp.json\', \'semgrep-security.json\']:' +
-                '    try:' +
-                '        with open(f) as fh: results[f.replace(\'.json\',\'\')] = json.load(fh)' +
-                '    except: results[f.replace(\'.json\',\'\')] = {\'error\': \'file not found\'};' +
-                'consolidated = {' +
-                '    \'timestamp\': datetime.datetime.utcnow().isoformat(),'+
-                '    \'scan_type\': \'SAST\','+
-                '    \'tool\': \'semgrep\','+
-                '    \'results\': results'+
-                '};' +
-                'with open(\'sast-consolidated-report.json\', \'w\') as out: json.dump(consolidated, out, indent=2)' +
-              '"',
+              'python /tmp/consolidate_sast.py /tmp/semgrep-results.json /tmp/sast-consolidated-report.json',
               'echo "[INFO] Uploading results to S3..."',
-              'TIMESTAMP=$(date +%Y%m%d-%H%M%S)',
-              'aws s3 cp sast-consolidated-report.json s3://${RESULTS_BUCKET}/${RESULTS_PREFIX}${TIMESTAMP}/sast-consolidated-report.json',
-              'aws s3 cp semgrep-results.json s3://${RESULTS_BUCKET}/${RESULTS_PREFIX}${TIMESTAMP}/semgrep-results.json || true',
-              'aws s3 cp semgrep-owasp.json s3://${RESULTS_BUCKET}/${RESULTS_PREFIX}${TIMESTAMP}/semgrep-owasp.json || true',
-              'aws s3 cp semgrep-security.json s3://${RESULTS_BUCKET}/${RESULTS_PREFIX}${TIMESTAMP}/semgrep-security.json || true',
+              'REPORT_DIR=${RESULTS_PREFIX}build-${CODEBUILD_BUILD_NUMBER}',
+              'REPORT_KEY=${REPORT_DIR}/sast-consolidated-report.json',
+              'aws s3 cp /tmp/sast-consolidated-report.json s3://${RESULTS_BUCKET}/${REPORT_KEY}',
+              'aws s3 cp /tmp/semgrep-results.json s3://${RESULTS_BUCKET}/${REPORT_DIR}/semgrep-results.json',
             ],
           },
-        },
-        artifacts: {
-          files: [
-            'sast-consolidated-report.json',
-            'semgrep-results.json',
-            'semgrep-owasp.json',
-            'semgrep-security.json',
-          ],
-          'discard-paths': 'yes',
         },
       }),
     });
@@ -154,11 +160,15 @@ export class SastPipelineStack extends cdk.Stack {
     // 4. CODEPIPELINE — Orchestrates the SAST flow
     // ─────────────────────────────────────────────
     const sourceOutput = new codepipeline.Artifact('SourceCode');
-    const sastOutput = new codepipeline.Artifact('SastResults');
+    const agentEvaluationLambda = this.createAgentEvaluationLambda(
+      resultsBucket, sourceBucket, auditsTable, knowledgeBaseId,
+    );
 
     const pipeline = new codepipeline.Pipeline(this, 'SastPipeline', {
       pipelineName: 'iso27001-sast-pipeline',
       pipelineType: codepipeline.PipelineType.V2,
+      // Each upload pins its own object version, so queueing keeps concurrent uploads apart
+      executionMode: codepipeline.ExecutionMode.QUEUED,
       restartExecutionOnUpdate: false,
       stages: [
         {
@@ -167,8 +177,9 @@ export class SastPipelineStack extends cdk.Stack {
             new codepipeline_actions.S3SourceAction({
               actionName: 'S3Source',
               bucket: sourceBucket,
-              bucketKey: 'uploads/application.zip',
+              bucketKey: UPLOAD_KEY,
               output: sourceOutput,
+              variablesNamespace: 'SourceVars',
               trigger: codepipeline_actions.S3Trigger.EVENTS,
             }),
           ],
@@ -180,7 +191,7 @@ export class SastPipelineStack extends cdk.Stack {
               actionName: 'RunSemgrepSAST',
               project: sastBuildProject,
               input: sourceOutput,
-              outputs: [sastOutput],
+              variablesNamespace: 'SastVars',
             }),
           ],
         },
@@ -189,10 +200,10 @@ export class SastPipelineStack extends cdk.Stack {
           actions: [
             new codepipeline_actions.LambdaInvokeAction({
               actionName: 'EvaluateSastResults',
-              lambda: this.createAgentEvaluationLambda(resultsBucket),
+              lambda: agentEvaluationLambda,
               userParameters: {
-                resultsBucket: resultsBucket.bucketName,
-                resultsPrefix: 'sast-reports/',
+                reportKey: '#{SastVars.REPORT_KEY}',
+                sourceVersionId: '#{SourceVars.VersionId}',
               },
             }),
           ],
@@ -202,6 +213,12 @@ export class SastPipelineStack extends cdk.Stack {
 
     // Grant pipeline read access to source bucket
     sourceBucket.grantRead(pipeline.role);
+
+    // Failures before the evaluation stage must still reach the frontend
+    pipeline.onStateChange('SastPipelineFailed', {
+      eventPattern: { detail: { state: ['FAILED'] } },
+      target: new events_targets.LambdaFunction(agentEvaluationLambda),
+    });
 
     // ─────────────────────────────────────────────
     // 5. LAMBDA — Presigned URL for .zip upload
@@ -220,6 +237,14 @@ export class SastPipelineStack extends cdk.Stack {
             }),
           ],
         }),
+        AuditRecords: new iam.PolicyDocument({
+          statements: [
+            new iam.PolicyStatement({
+              actions: ['dynamodb:GetItem', 'dynamodb:UpdateItem'],
+              resources: [auditsTable.tableArn],
+            }),
+          ],
+        }),
       },
     });
 
@@ -235,7 +260,9 @@ export class SastPipelineStack extends cdk.Stack {
       memorySize: 256,
       environment: {
         BUCKET_NAME: sourceBucket.bucketName,
-        UPLOAD_KEY: 'uploads/application.zip',
+        UPLOAD_KEY,
+        AUDITS_TABLE: auditsTableName,
+        ALLOWED_ORIGIN: allowedOrigin,
         URL_EXPIRATION_SECONDS: '3600',
       },
       logRetention: logs.RetentionDays.ONE_WEEK,
@@ -270,7 +297,12 @@ export class SastPipelineStack extends cdk.Stack {
   // Invokes Bedrock agent to evaluate SAST findings
   // against ISO 27001 controls using the Knowledge Base
   // ─────────────────────────────────────────────
-  private createAgentEvaluationLambda(resultsBucket: s3.Bucket): lambda.Function {
+  private createAgentEvaluationLambda(
+    resultsBucket: s3.Bucket,
+    sourceBucket: s3.Bucket,
+    auditsTable: dynamodb.ITable,
+    knowledgeBaseId: string,
+  ): lambda.Function {
     const agentRole = new iam.Role(this, 'AgentEvaluationRole', {
       assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
       managedPolicies: [
@@ -285,12 +317,27 @@ export class SastPipelineStack extends cdk.Stack {
             }),
           ],
         }),
+        SourceMetadata: new iam.PolicyDocument({
+          statements: [
+            new iam.PolicyStatement({
+              actions: ['s3:GetObject', 's3:GetObjectVersion'],
+              resources: [`${sourceBucket.bucketArn}/${UPLOAD_KEY}`],
+            }),
+          ],
+        }),
+        AuditRecords: new iam.PolicyDocument({
+          statements: [
+            new iam.PolicyStatement({
+              actions: ['dynamodb:UpdateItem'],
+              resources: [auditsTable.tableArn],
+            }),
+          ],
+        }),
         BedrockAccess: new iam.PolicyDocument({
           statements: [
             new iam.PolicyStatement({
               actions: [
                 'bedrock:InvokeModel',
-                'bedrock:RetrieveAndGenerate',
                 'bedrock:Retrieve',
               ],
               resources: ['*'],
@@ -303,6 +350,7 @@ export class SastPipelineStack extends cdk.Stack {
               actions: [
                 'codepipeline:PutJobSuccessResult',
                 'codepipeline:PutJobFailureResult',
+                'codepipeline:GetPipelineExecution',
               ],
               resources: ['*'],
             }),
@@ -319,14 +367,16 @@ export class SastPipelineStack extends cdk.Stack {
         path.join(__dirname, '../../lambdas/agent_evaluation')
       ),
       role: agentRole,
-      timeout: cdk.Duration.minutes(10),
+      timeout: cdk.Duration.minutes(15),
       memorySize: 1024,
       environment: {
         RESULTS_BUCKET: resultsBucket.bucketName,
-        RESULTS_PREFIX: 'sast-reports/',
         EVALUATION_PREFIX: 'agent-evaluations/',
-        GENERATION_MODEL_ID: 'amazon.nova-pro-v1:0',
-        KB_ID: '', // Set after KB is created or via SSM parameter
+        GENERATION_MODEL_ID: 'us.amazon.nova-pro-v1:0',
+        KB_ID: knowledgeBaseId,
+        SOURCE_BUCKET: sourceBucket.bucketName,
+        SOURCE_KEY: UPLOAD_KEY,
+        AUDITS_TABLE: auditsTable.tableName,
       },
       logRetention: logs.RetentionDays.ONE_WEEK,
     });
