@@ -223,7 +223,9 @@ python backend/agentcore/preflight.py --knowledge-base-id <KB_ID>
 
 Comprueba credenciales, acceso al modelo, **invocación de herramientas** y el Knowledge Base. Todos los agentes usan Claude Sonnet 4.5 por su perfil de inferencia. Para cambiar de modelo usa `-c modelId=<id>`.
 
-Claude Sonnet 4.5 está en estado *Legacy* en Bedrock: confirma su fecha de retiro en la ficha del modelo antes de desplegar.
+Claude Sonnet 4.5 está en estado *Legacy* en Bedrock y se retira el 8 de abril de 2027.
+
+La ingesta no usa este modelo: `actividad1.16` conserva Nova Pro para el parsing y la validación RAG, y Titan para los embeddings.
 
 ### 5.3 Despliegue completo
 

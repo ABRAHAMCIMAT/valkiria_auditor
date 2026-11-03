@@ -107,12 +107,10 @@ export class IngestionStack extends cdk.Stack {
         BedrockModelAccess: new iam.PolicyDocument({
           statements: [
             new iam.PolicyStatement({
-              actions: ['bedrock:InvokeModel', 'bedrock:GetInferenceProfile'],
+              actions: ['bedrock:InvokeModel'],
               resources: [
                 `arn:aws:bedrock:${this.region}::foundation-model/amazon.titan-embed-text-v2:0`,
-                // The inference profile routes across regions, so its model ARN uses a wildcard
-                `arn:aws:bedrock:${this.region}:${this.account}:inference-profile/us.anthropic.claude-sonnet-4-5-20250929-v1:0`,
-                `arn:aws:bedrock:*::foundation-model/anthropic.claude-sonnet-4-5-20250929-v1:0`,
+                `arn:aws:bedrock:${this.region}::foundation-model/amazon.nova-pro-v1:0`,
               ],
             }),
           ],
@@ -264,7 +262,7 @@ export class IngestionStack extends cdk.Stack {
     // ─────────────────────────────────────────────
     // 7. LAMBDA — KB INGESTION / CHUNKING (Step 2)
     // Uses Bedrock Knowledge Bases API:
-    //   - Parsing:  BEDROCK_FOUNDATION_MODEL (us.anthropic.claude-sonnet-4-5-20250929-v1:0)
+    //   - Parsing:  BEDROCK_FOUNDATION_MODEL (amazon.nova-pro-v1:0)
     //   - Chunking: SEMANTIC (NLP-based sentence grouping)
     //   - Embedding: amazon.titan-embed-text-v2:0 (1024 dims)
     // ─────────────────────────────────────────────
@@ -286,9 +284,8 @@ export class IngestionStack extends cdk.Stack {
         KB_ROLE_ARN:                kbRole.roleArn,
         OPENSEARCH_COLLECTION_ARN:  ossCollection.attrArn,
         OPENSEARCH_INDEX:           'iso27001-controls-index',
-        // Parsing: Claude Sonnet 4.5 vision model — extracts tables, figures, images from PDFs
-        PARSING_MODEL_ID:           'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
-        AWS_ACCOUNT_ID:             this.account,
+        // Parsing: Nova Pro vision model — extracts tables, figures, images from PDFs
+        PARSING_MODEL_ID:           'amazon.nova-pro-v1:0',
         // Chunking: SEMANTIC groups sentences by NLP similarity
         // Alternative: HIERARCHICAL for parent/child chunk retrieval
         CHUNKING_STRATEGY:          'SEMANTIC',
@@ -306,7 +303,7 @@ export class IngestionStack extends cdk.Stack {
     // ─────────────────────────────────────────────
     // 8. LAMBDA — RAG VALIDATION (Step 3)
     // Runs test queries against the KB using RetrieveAndGenerate
-    //   - Generation: us.anthropic.claude-sonnet-4-5-20250929-v1:0
+    //   - Generation: amazon.nova-pro-v1:0
     //   - Retrieval:  SEMANTIC search, top-5 chunks
     // ─────────────────────────────────────────────
     const vectorDbLambda = new lambda.Function(this, 'VectorDbLambda', {
@@ -323,8 +320,8 @@ export class IngestionStack extends cdk.Stack {
         BUCKET_NAME:          dataBucket.bucketName,
         VALIDATION_PREFIX:    'validation/',
         // Generation model for RetrieveAndGenerate
-        GENERATION_MODEL_ID:  'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
-        AWS_ACCOUNT_ID:       this.account,
+        // Nova Pro: latest Amazon Nova, strong reasoning, available in us-east-1
+        GENERATION_MODEL_ID:  'amazon.nova-pro-v1:0',
         // Must match the embedding model used during KB creation
         EMBEDDING_MODEL_ID:   'amazon.titan-embed-text-v2:0',
         NUMBER_OF_RESULTS:    '5',
@@ -347,15 +344,15 @@ export class IngestionStack extends cdk.Stack {
     // Step 2: KB Ingestion (parsing + chunking + embedding via Bedrock Knowledge Bases)
     const chunkingTask = new tasks.LambdaInvoke(this, 'RunKbIngestion', {
       lambdaFunction: chunkingLambda,
-      comment: 'Step 2: Bedrock KB ingestion — Claude Sonnet 4.5 parsing + SEMANTIC chunking + Titan embeddings',
+      comment: 'Step 2: Bedrock KB ingestion — Nova Pro parsing + SEMANTIC chunking + Titan embeddings',
       outputPath: '$.Payload',
       retryOnServiceExceptions: true,
     });
 
-    // Step 3: RAG Validation (RetrieveAndGenerate with Claude Sonnet 4.5)
+    // Step 3: RAG Validation (RetrieveAndGenerate with Nova Pro)
     const vectorDbTask = new tasks.LambdaInvoke(this, 'RunRagValidation', {
       lambdaFunction: vectorDbLambda,
-      comment: 'Step 3: RAG validation — RetrieveAndGenerate with Claude Sonnet 4.5',
+      comment: 'Step 3: RAG validation — RetrieveAndGenerate with Nova Pro',
       outputPath: '$.Payload',
       retryOnServiceExceptions: true,
     });

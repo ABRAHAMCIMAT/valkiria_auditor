@@ -3,7 +3,7 @@ Lambda: chunking  (Step 2 del pipeline)
 Crea o actualiza la Bedrock Knowledge Base y su Data Source con:
 
   - Parsing strategy : BEDROCK_FOUNDATION_MODEL
-      Modelo: us.anthropic.claude-sonnet-4-5-20250929-v1:0  (vision model, ideal para PDFs con tablas/imágenes)
+      Modelo: amazon.nova-pro-v1:0  (vision model, ideal para PDFs con tablas/imágenes)
       Prompt personalizado para documentos de auditoría ISO 27001
 
   - Chunking strategy: SEMANTIC
@@ -76,12 +76,11 @@ EMBEDDING_DIMS = int(os.environ.get("EMBEDDING_DIMENSIONS", "1024"))
 
 # ── Parsing model ─────────────────────────────────────────────────────────────
 # Foundation model parsing supports: Claude vision, Nova vision, LLaMA 4 vision
-# Claude Sonnet 4.5 is a Claude vision model, used through its inference profile
+# amazon.nova-pro-v1:0 is a Nova vision model — excellent for PDFs with tables/images
 # Ref: https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-supported.html
 PARSING_MODEL_ID = os.environ.get(
-    "PARSING_MODEL_ID", "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+    "PARSING_MODEL_ID", "amazon.nova-pro-v1:0"
 )
-AWS_ACCOUNT_ID = os.environ.get("AWS_ACCOUNT_ID", "")
 
 # ── Chunking ──────────────────────────────────────────────────────────────────
 # SEMANTIC chunking uses NLP to group semantically similar sentences.
@@ -105,7 +104,7 @@ bedrock_agent = boto3.client("bedrock-agent", region_name=REGION)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PARSING PROMPT
-# Customizes how Claude Sonnet 4.5 interprets audit documents during ingestion.
+# Customizes how Nova Pro interprets audit documents during ingestion.
 # ─────────────────────────────────────────────────────────────────────────────
 
 PARSING_PROMPT = """You are an expert in information security and ISO 27001:2022 auditing.
@@ -204,7 +203,7 @@ def _find_existing_data_source(kb_id: str, ds_name: str) -> str | None:
 def _create_data_source(kb_id: str) -> str:
     """
     Create an S3 data source with:
-      - BEDROCK_FOUNDATION_MODEL parsing (Claude Sonnet 4.5) for PDF extraction
+      - BEDROCK_FOUNDATION_MODEL parsing (Nova Pro) for PDF extraction
       - SEMANTIC chunking (NLP-based sentence grouping)
     """
     ds_name = f"{KB_NAME}-s3-source"
@@ -266,7 +265,7 @@ def _create_data_source(kb_id: str) -> str:
                 "parsingStrategy": "BEDROCK_FOUNDATION_MODEL",
                 "bedrockFoundationModelConfiguration": {
                     "modelArn": (
-                        f"arn:aws:bedrock:{REGION}:{AWS_ACCOUNT_ID}:inference-profile/{PARSING_MODEL_ID}"
+                        f"arn:aws:bedrock:{REGION}::foundation-model/{PARSING_MODEL_ID}"
                     ),
                     "parsingPrompt": {
                         "parsingPromptText": PARSING_PROMPT,
