@@ -53,7 +53,7 @@ def launch(plan: dict, role_arn: str) -> str:
     return estimator.latest_training_job.name
 
 
-def main() -> int:
+def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--agent", required=True, choices=sorted(AGENTS) + ["all"])
     parser.add_argument("--role-arn", required=True)
@@ -70,12 +70,11 @@ def main() -> int:
 
     if not args.execute:
         print("[INFO] Plan only. Add --execute to launch.")
-        return 0
+        return
 
     for plan in plans:
         print(f"[INFO] Started job: {launch(plan, args.role_arn)}")
-    return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

@@ -6,8 +6,13 @@ import json
 import os
 
 import boto3
+from botocore.config import Config
 
-bedrock_agent = boto3.client('bedrock-agent-runtime')
+# The Lambda timeout is 60 seconds
+bedrock_agent = boto3.client(
+    'bedrock-agent-runtime',
+    config=Config(connect_timeout=5, read_timeout=45),
+)
 
 KNOWLEDGE_BASE_ID = os.environ['KNOWLEDGE_BASE_ID']
 DEFAULT_RESULTS = 5

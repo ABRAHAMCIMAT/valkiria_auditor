@@ -10,8 +10,8 @@ import * as cloudtrail from 'aws-cdk-lib/aws-cloudtrail';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as events_targets from 'aws-cdk-lib/aws-events-targets';
 import * as logs from 'aws-cdk-lib/aws-logs';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 const UPLOAD_KEY = 'uploads/application.zip';
 const SEMGREP_VERSION = '1.183.0';
@@ -376,6 +376,7 @@ export class SastPipelineStack extends cdk.Stack {
         KB_ID: knowledgeBaseId,
         SOURCE_BUCKET: sourceBucket.bucketName,
         SOURCE_KEY: UPLOAD_KEY,
+        AWS_ACCOUNT_ID: this.account,
         AUDITS_TABLE: auditsTable.tableName,
       },
       logRetention: logs.RetentionDays.ONE_WEEK,

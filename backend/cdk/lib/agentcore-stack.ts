@@ -7,7 +7,7 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
-import * as path from 'path';
+import * as path from 'node:path';
 
 const MODEL_ID = 'us.anthropic.claude-sonnet-4-5-20250929-v1:0';
 
@@ -60,6 +60,7 @@ export class AgentCoreStack extends cdk.Stack {
 
     this.dataBucket = new s3.Bucket(this, 'AuditDataBucket', {
       bucketName: `valkiria-audit-data-${this.account}`,
+      versioned: true,
       encryption: s3.BucketEncryption.S3_MANAGED,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       enforceSSL: true,
@@ -158,6 +159,7 @@ export class AgentCoreStack extends cdk.Stack {
     // ─────────────────────────────────────────────────────────────────────
     const commonEnv: Record<string, string> = {
       AWS_REGION: this.region,
+      AWS_ACCOUNT_ID: this.account,
       KNOWLEDGE_BASE_ID: knowledgeBaseId,
       BUCKET_NAME: this.dataBucket.bucketName,
       FINDINGS_TABLE: 'AuditFindings',

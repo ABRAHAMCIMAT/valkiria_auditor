@@ -358,7 +358,7 @@ const AuditoriasPage = {
           <td>${i + 1}</td>
           <td><a href="#/auditorias/${a.id}" class="table__link">${escapeHtml(a.nombre)}</a></td>
           <td><span class="badge badge--info">ISO ${a.isoVersion}</span></td>
-          <td>${a.archivos && a.archivos.length ? `<span class="badge badge--complete">${a.archivos.length} archivo${a.archivos.length > 1 ? 's' : ''}</span>` : '<span style="opacity:0.5;">—</span>'}</td>
+          <td>${this.renderArchivos(a.archivos)}</td>
           <td>${escapeHtml(a.creada)}</td>
           <td>${a.completada ? escapeHtml(a.completada) : `<span class="badge badge--pending">${escapeHtml(a.estado)}</span>`}</td>
           <td>
@@ -382,6 +382,13 @@ const AuditoriasPage = {
     } catch (error) {
       tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-state__icon">⚠️</div><p class="empty-state__text">Error al cargar auditorías</p></div></td></tr>`;
     }
+  },
+
+  renderArchivos(archivos) {
+    const total = archivos?.length ?? 0;
+    if (total === 0) return '<span style="opacity:0.5;">—</span>';
+    const etiqueta = total > 1 ? 'archivos' : 'archivo';
+    return `<span class="badge badge--complete">${total} ${etiqueta}</span>`;
   },
 
   openModal(modal) { modal.classList.add('modal-overlay--active'); modal.querySelector('input, select').focus(); },

@@ -18,11 +18,17 @@ import os
 import datetime
 import re
 
-s3_client = boto3.client('s3')
-bedrock_agent = boto3.client('bedrock-agent-runtime')
-bedrock_runtime = boto3.client('bedrock-runtime')
-codepipeline_client = boto3.client('codepipeline')
-dynamodb = boto3.resource('dynamodb')
+from botocore.config import Config
+
+AWS_CONFIG = Config(connect_timeout=5, read_timeout=30)
+# A batch of rules can take minutes to evaluate; the Lambda timeout is 15 minutes
+MODEL_CONFIG = Config(connect_timeout=5, read_timeout=300)
+
+s3_client = boto3.client('s3', config=AWS_CONFIG)
+bedrock_agent = boto3.client('bedrock-agent-runtime', config=AWS_CONFIG)
+bedrock_runtime = boto3.client('bedrock-runtime', config=MODEL_CONFIG)
+codepipeline_client = boto3.client('codepipeline', config=AWS_CONFIG)
+dynamodb = boto3.resource('dynamodb', config=AWS_CONFIG)
 
 RESULTS_BUCKET = os.environ['RESULTS_BUCKET']
 EVALUATION_PREFIX = os.environ['EVALUATION_PREFIX']
@@ -31,6 +37,9 @@ SOURCE_BUCKET = os.environ['SOURCE_BUCKET']
 SOURCE_KEY = os.environ['SOURCE_KEY']
 AUDITS_TABLE = os.environ['AUDITS_TABLE']
 KB_ID = os.environ.get('KB_ID', '')
+AWS_ACCOUNT_ID = os.environ['AWS_ACCOUNT_ID']
+
+PIPELINE_JOB_KEY = 'CodePipeline.job'
 
 RULES_PER_BATCH = 25
 KB_QUERIES = 5
@@ -68,7 +77,7 @@ CWE_PATTERN = re.compile(r'CWE-\d+')
 
 
 def lambda_handler(event, context):
-    if 'CodePipeline.job' in event:
+    if PIPELINE_JOB_KEY in event:
         return handle_pipeline_job(event)
     return handle_pipeline_failure(event)
 
@@ -81,9 +90,9 @@ def handle_pipeline_job(event):
     3. Stores evaluation report in S3
     4. Reports success/failure back to CodePipeline
     """
-    job_id = event['CodePipeline.job']['id']
+    job_id = event[PIPELINE_JOB_KEY]['id']
     user_params = json.loads(
-        event['CodePipeline.job']['data']['actionConfiguration']
+        event[PIPELINE_JOB_KEY]['data']['actionConfiguration']
               ['configuration']['UserParameters']
     )
 
@@ -149,7 +158,7 @@ def handle_pipeline_failure(event):
 def get_upload_owner(version_id):
     """Read which tenant and evaluation an uploaded version belongs to."""
     metadata = s3_client.head_object(
-        Bucket=SOURCE_BUCKET, Key=SOURCE_KEY, VersionId=version_id
+        Bucket=SOURCE_BUCKET, Key=SOURCE_KEY, VersionId=version_id, ExpectedBucketOwner=AWS_ACCOUNT_ID
     ).get('Metadata', {})
     return {
         'tenant_id': metadata.get('tenant-id', ''),
@@ -177,7 +186,7 @@ def update_evaluation(owner, estado, **fields):
 
 
 def load_sast_report(report_key):
-    obj = s3_client.get_object(Bucket=RESULTS_BUCKET, Key=report_key)
+    obj = s3_client.get_object(Bucket=RESULTS_BUCKET, Key=report_key, ExpectedBucketOwner=AWS_ACCOUNT_ID)
     report = json.loads(obj['Body'].read().decode('utf-8'))
     if 'results' not in report:
         raise ValueError(f'Invalid SAST report: {report_key}')
@@ -406,6 +415,7 @@ def store_evaluation_report(evaluation, sast_report, owner):
         Key=key,
         Body=json.dumps(report, indent=2, default=str),
         ContentType='application/json',
+        ExpectedBucketOwner=AWS_ACCOUNT_ID,
     )
 
     return key

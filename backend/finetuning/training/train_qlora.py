@@ -14,6 +14,7 @@ import argparse
 import inspect
 import json
 import os
+import tempfile
 
 import torch
 from datasets import load_dataset
@@ -29,7 +30,7 @@ from transformers import (
 )
 
 IGNORE_INDEX = -100
-DEQUANTIZED_DIR = "/tmp/base_model_bf16"
+SAGEMAKER_ROOT = "/opt/ml"
 LORA_TARGET_LAYERS = r"(q_proj|k_proj|v_proj|o_proj)"
 VISION_MARKERS = ("vision", "multi_modal", "mm_projector")
 
@@ -49,6 +50,16 @@ def parse_args():
     parser.add_argument("--train_dir", default=os.environ.get("SM_CHANNEL_TRAIN", "/opt/ml/input/data/train"))
     parser.add_argument("--output_dir", default=os.environ.get("SM_MODEL_DIR", "/opt/ml/model"))
     return parser.parse_args()
+
+
+def resolve_data_dir(path: str) -> str:
+    """Resolve a directory, accepting only SageMaker's paths or the temporary directory."""
+    resolved = os.path.realpath(path)
+    for root in (SAGEMAKER_ROOT, tempfile.gettempdir()):
+        base = os.path.realpath(root)
+        if resolved.startswith(base + os.sep):
+            return resolved
+    raise ValueError(f"Directory outside the allowed locations: {path}")
 
 
 def is_multimodal(config) -> bool:
@@ -78,9 +89,10 @@ def dequantize_weights(model_id: str, config) -> str:
         torch_dtype=torch.bfloat16,
         device_map="cpu",
     )
-    model.save_pretrained(DEQUANTIZED_DIR)
+    dequantized_dir = tempfile.mkdtemp(prefix="base_model_bf16_")
+    model.save_pretrained(dequantized_dir)
     del model
-    return DEQUANTIZED_DIR
+    return dequantized_dir
 
 
 def load_base_model(model_id: str, quantize: bool):
@@ -179,14 +191,16 @@ def collate(features: list[dict], pad_token_id: int) -> dict:
 
 def main():
     args = parse_args()
-    print(f"[INFO] Training {args.model_id} from {args.train_dir}")
+    train_dir = resolve_data_dir(args.train_dir)
+    output_dir = resolve_data_dir(args.output_dir)
+    print(f"[INFO] Training {args.model_id} from {train_dir}")
 
     tokenizer = AutoTokenizer.from_pretrained(args.model_id)
     pad_token_id = tokenizer.pad_token_id if tokenizer.pad_token_id is not None else tokenizer.eos_token_id
 
     dataset = load_dataset("json", data_files={
-        "train": os.path.join(args.train_dir, "train.jsonl"),
-        "validation": os.path.join(args.train_dir, "val.jsonl"),
+        "train": os.path.join(train_dir, "train.jsonl"),
+        "validation": os.path.join(train_dir, "val.jsonl"),
     })
     dataset = dataset.map(
         lambda example: tokenize_example(example, tokenizer, args.max_seq_length),
@@ -200,7 +214,7 @@ def main():
     trainer = Trainer(
         model=model,
         args=TrainingArguments(
-            output_dir=args.output_dir,
+            output_dir=output_dir,
             num_train_epochs=args.epochs,
             max_steps=args.max_steps,
             per_device_train_batch_size=args.batch_size,
@@ -227,11 +241,11 @@ def main():
     trainer.train()
     metrics = trainer.evaluate()
 
-    model.save_pretrained(args.output_dir)
-    tokenizer.save_pretrained(args.output_dir)
-    with open(os.path.join(args.output_dir, "training_metrics.json"), "w", encoding="utf-8") as f:
+    model.save_pretrained(output_dir)
+    tokenizer.save_pretrained(output_dir)
+    with open(os.path.join(output_dir, "training_metrics.json"), "w", encoding="utf-8") as f:
         json.dump(metrics, f, indent=2)
-    print(f"[INFO] Adapter saved to {args.output_dir}: {metrics}")
+    print(f"[INFO] Adapter saved to {output_dir}: {metrics}")
 
 
 if __name__ == "__main__":

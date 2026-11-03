@@ -29,6 +29,7 @@ ORCHESTRATOR_RUNTIME_ARN = os.environ.get('ORCHESTRATOR_RUNTIME_ARN', '')
 FRAMEWORK_FUNCTIONS = json.loads(os.environ.get('FRAMEWORK_FUNCTIONS', '{}'))
 URL_EXPIRATION = int(os.environ.get('URL_EXPIRATION_SECONDS', '3600'))
 
+CONTENT_TYPE_JSON = 'application/json'
 MAX_FILES_PER_AUDIT = 25
 MAX_NAME_LENGTH = 200
 MAX_TEXT_LENGTH = 10000
@@ -49,9 +50,15 @@ DOMAIN_AGENTS = {
     'A.8': 'Agente Controles Tecnológicos',
 }
 
-dynamodb = boto3.resource('dynamodb')
-s3_client = boto3.client('s3', config=Config(signature_version='s3v4'))
-lambda_client = boto3.client('lambda')
+# API Gateway cuts responses at 29 seconds, so AWS calls must fail before that
+AWS_CONFIG = Config(connect_timeout=3, read_timeout=10, retries={'max_attempts': 2})
+# Retries stay off: a repeated call could start the same audit twice
+DISPATCH_CONFIG = Config(connect_timeout=3, read_timeout=20, retries={'total_max_attempts': 1})
+
+dynamodb = boto3.resource('dynamodb', config=AWS_CONFIG)
+s3_client = boto3.client('s3', config=Config(signature_version='s3v4', connect_timeout=3, read_timeout=10))
+lambda_client = boto3.client('lambda', config=DISPATCH_CONFIG)
+agentcore_client = boto3.client('bedrock-agentcore', config=DISPATCH_CONFIG)
 
 
 class ApiError(Exception):
@@ -65,7 +72,7 @@ def response(status, body):
     return {
         'statusCode': status,
         'headers': {
-            'Content-Type': 'application/json',
+            'Content-Type': CONTENT_TYPE_JSON,
             'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
         },
         'body': json.dumps(body, default=_json_default),
@@ -315,12 +322,11 @@ def dispatch_audit(item, framework):
     audit_id = item['id']
 
     if framework == 'strands' and ORCHESTRATOR_RUNTIME_ARN:
-        client = boto3.client('bedrock-agentcore')
-        result = client.invoke_agent_runtime(
+        result = agentcore_client.invoke_agent_runtime(
             agentRuntimeArn=ORCHESTRATOR_RUNTIME_ARN,
             runtimeSessionId=f'audit-{audit_id}'.ljust(33, '0'),
-            contentType='application/json',
-            accept='application/json',
+            contentType=CONTENT_TYPE_JSON,
+            accept=CONTENT_TYPE_JSON,
             payload=json.dumps({
                 'async': True,
                 'prompt': build_audit_prompt(item),

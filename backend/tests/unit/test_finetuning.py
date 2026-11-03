@@ -19,6 +19,7 @@ import draft_examples  # noqa: E402
 import evaluate_model  # noqa: E402
 import launch_training  # noqa: E402
 import promotion_gate  # noqa: E402
+import safe_paths  # noqa: E402
 
 
 def example(number=1, level="conforming", control="A.7.1", source=None, **overrides):
@@ -68,29 +69,35 @@ class TestValidation:
 
     @pytest.mark.parametrize("status", ["pending_review", "rejected", ""])
     def test_unreviewed_examples_are_rejected(self, status):
+        row = example(review_status=status)
         with pytest.raises(build_dataset.DatasetError):
-            self.check(example(review_status=status))
+            self.check(row)
 
     def test_reviewer_is_required(self):
+        row = example(reviewed_by=" ")
         with pytest.raises(build_dataset.DatasetError):
-            self.check(example(reviewed_by=" "))
+            self.check(row)
 
     def test_invented_control_is_rejected(self):
+        row = example(control="A.14.2.5")
         with pytest.raises(build_dataset.DatasetError):
-            self.check(example(control="A.14.2.5"))
+            self.check(row)
 
     def test_control_of_another_domain_is_rejected(self):
+        row = example(control="A.5.1")
         with pytest.raises(build_dataset.DatasetError):
-            self.check(example(control="A.5.1"))
+            self.check(row)
 
     def test_unknown_label_is_rejected(self):
+        row = example(level="observation")
         with pytest.raises(build_dataset.DatasetError):
-            self.check(example(level="observation"))
+            self.check(row)
 
     @pytest.mark.parametrize("score", [6, -1, "3", 2.5])
     def test_invalid_maturity_is_rejected(self, score):
+        row = example(maturity_score=score)
         with pytest.raises(build_dataset.DatasetError):
-            self.check(example(maturity_score=score))
+            self.check(row)
 
     def test_evaluation_set_overlap_is_rejected(self):
         row = example()
@@ -107,7 +114,8 @@ class TestBuild:
         curated = tmp_path / "controls_a7.jsonl"
         write_curated(curated, balanced())
         train, val = build_dataset.build_agent_dataset("controls_a7", curated, set())
-        assert train and val
+        assert train
+        assert val
         roles = [m["role"] for m in train[0]["messages"]]
         assert roles == ["system", "user", "assistant"]
         answer = json.loads(train[0]["messages"][-1]["content"])
@@ -141,6 +149,16 @@ class TestBuild:
     def test_cli_fails_when_there_is_no_reviewed_data(self, tmp_path, monkeypatch):
         monkeypatch.setattr(sys, "argv", ["build", "--out", str(tmp_path), "--curated-dir", str(tmp_path)])
         assert build_dataset.main() == 1
+
+
+class TestSafePaths:
+    def test_paths_outside_the_workspace_are_rejected(self):
+        with pytest.raises(ValueError):
+            safe_paths.resolve_in_workspace("/etc/hosts")
+
+    def test_repository_paths_are_accepted(self):
+        path = safe_paths.REPO_ROOT / "README.md"
+        assert safe_paths.resolve_in_workspace(path) == path
 
 
 class TestDrafts:
@@ -231,7 +249,7 @@ class TestLaunch:
     def test_default_does_not_launch(self, monkeypatch, capsys):
         monkeypatch.setattr(launch_training, "launch", MagicMock(side_effect=AssertionError("launched")))
         monkeypatch.setattr(sys, "argv", ["launch", "--agent", "all", "--role-arn", "r", "--train-s3", "s3://b/d"])
-        assert launch_training.main() == 0
+        launch_training.main()
         assert "Plan only" in capsys.readouterr().out
 
     def test_plan_points_each_agent_to_its_own_data(self):

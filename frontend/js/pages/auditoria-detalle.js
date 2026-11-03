@@ -64,7 +64,7 @@ const AuditoriaDetallePage = {
             <dt style="font-weight:600;">Última actualización:</dt>
             <dd>${escapeHtml(a.actualizacion)}</dd>
             ${a.error ? `<dt style="font-weight:600;">Error:</dt><dd>${escapeHtml(a.error)}</dd>` : ''}
-            ${a.report_url && /^https:/.test(a.report_url) ? `<dt style="font-weight:600;">Reporte:</dt><dd><a href="${escapeHtml(a.report_url)}" target="_blank" rel="noopener">Descargar reporte consolidado</a></dd>` : ''}
+            ${a.report_url?.startsWith('https:') ? `<dt style="font-weight:600;">Reporte:</dt><dd><a href="${escapeHtml(a.report_url)}" target="_blank" rel="noopener">Descargar reporte consolidado</a></dd>` : ''}
           </dl>
         </div>
 

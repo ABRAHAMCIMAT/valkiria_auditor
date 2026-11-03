@@ -92,7 +92,7 @@ def validate_example(example: dict, agent: str, holdout: set[str]) -> None:
         raise DatasetError("evidence overlaps with an evaluation set")
 
 
-def to_chat(example: dict, agent: str, prompt: str) -> dict:
+def to_chat(example: dict, prompt: str) -> dict:
     answer = {
         "control_id": example["control_id"],
         "conformity_level": example["conformity_level"],
@@ -139,8 +139,8 @@ def build_agent_dataset(agent: str, curated_path: Path, holdout: set[str]) -> tu
         examples.append(example)
 
     prompt = system_prompt(agent)
-    train = [to_chat(e, agent, prompt) for e in examples if not is_validation_document(e["source_document"])]
-    val = [to_chat(e, agent, prompt) for e in examples if is_validation_document(e["source_document"])]
+    train = [to_chat(e, prompt) for e in examples if not is_validation_document(e["source_document"])]
+    val = [to_chat(e, prompt) for e in examples if is_validation_document(e["source_document"])]
 
     if len(train) < MIN_TRAIN_EXAMPLES:
         raise DatasetError(f"{agent}: {len(train)} training examples, at least {MIN_TRAIN_EXAMPLES} are required")

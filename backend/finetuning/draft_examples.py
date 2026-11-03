@@ -22,6 +22,7 @@ import boto3
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from agents import ANNEX_A_2022  # noqa: E402
+from safe_paths import resolve_in_workspace  # noqa: E402
 
 DEFAULT_MODEL_ID = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
 PASSAGE_CHARS = 6000
@@ -101,17 +102,19 @@ def main() -> int:
     parser.add_argument("--model-id", default=DEFAULT_MODEL_ID)
     args = parser.parse_args()
 
+    input_path = resolve_in_workspace(args.input)
+    out_path = resolve_in_workspace(args.out)
     client = boto3.client("bedrock-runtime", region_name=os.environ.get("AWS_REGION", "us-east-1"))
-    passages = split_passages(extract_text(args.input))
+    passages = split_passages(extract_text(input_path))
     drafts = []
     for passage in passages:
-        drafts.extend(draft_from_passage(client, args.model_id, passage, args.input.name))
+        drafts.extend(draft_from_passage(client, args.model_id, passage, input_path.name))
 
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    with args.out.open("w", encoding="utf-8") as f:
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with out_path.open("w", encoding="utf-8") as f:
         for draft in drafts:
             f.write(json.dumps(draft, ensure_ascii=False) + "\n")
-    print(f"[INFO] {len(drafts)} drafts from {len(passages)} passages, pending human review: {args.out}")
+    print(f"[INFO] {len(drafts)} drafts from {len(passages)} passages, pending human review: {out_path}")
     return 0
 
 

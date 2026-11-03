@@ -5,7 +5,18 @@ happen, which stops the pipeline before an empty report can read as "no findings
 """
 import datetime
 import json
+import os
 import sys
+import tempfile
+
+
+def resolve_in_work_dir(path):
+    """Resolve a path, rejecting anything outside the build's temporary directory."""
+    work_dir = os.path.realpath(tempfile.gettempdir())
+    resolved = os.path.realpath(path)
+    if not resolved.startswith(work_dir + os.sep):
+        raise ValueError(f'Path outside {work_dir}: {path}')
+    return resolved
 
 
 def consolidate(semgrep_output):
@@ -29,13 +40,14 @@ def consolidate(semgrep_output):
 
 def main(input_path, output_path):
     try:
-        with open(input_path, encoding='utf-8') as f:
+        output_file = resolve_in_work_dir(output_path)
+        with open(resolve_in_work_dir(input_path), encoding='utf-8') as f:
             report = consolidate(json.load(f))
     except (OSError, ValueError) as e:
         print(f"[ERROR] SAST scan unusable: {str(e)}")
         return 1
 
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(report, f, indent=2)
     print(f"[INFO] {len(report['results'])} findings in {report['files_scanned']} files")
     return 0

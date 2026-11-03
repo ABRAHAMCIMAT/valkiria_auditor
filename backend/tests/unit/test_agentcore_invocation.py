@@ -34,7 +34,7 @@ def orchestrator(monkeypatch):
 
 @pytest.fixture(autouse=True)
 def reset_client(monkeypatch):
-    invocation._client = None
+    monkeypatch.setattr(invocation, "_client", None)
     for key in invocation.LOCAL_PORTS:
         monkeypatch.delenv(f"{key}_AGENT_ARN", raising=False)
         monkeypatch.delenv(f"{key}_AGENT_ENDPOINT", raising=False)
@@ -46,7 +46,7 @@ class TestInvokeSubAgent:
         monkeypatch.setenv("PHYSICAL_CONTROLS_AGENT_ARN", "arn:aws:bedrock-agentcore:us-east-1:1:runtime/x")
         client = MagicMock()
         client.invoke_agent_runtime.return_value = {"response": io.BytesIO(b'{"response": "ok"}')}
-        invocation._client = client
+        monkeypatch.setattr(invocation, "_client", client)
 
         result = invocation.invoke_sub_agent("PHYSICAL_CONTROLS", {"prompt": "p", "session_id": "s"})
 
@@ -71,7 +71,7 @@ class TestInvokeSubAgent:
         monkeypatch.setenv("TECH_CONTROLS_AGENT_ARN", "arn")
         client = MagicMock()
         client.invoke_agent_runtime.side_effect = RuntimeError("throttled")
-        invocation._client = client
+        monkeypatch.setattr(invocation, "_client", client)
 
         result = invocation.invoke_sub_agent("TECH_CONTROLS", {"prompt": "p"})
 
@@ -119,6 +119,7 @@ def audit_infra(monkeypatch):
         monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
         monkeypatch.setenv("AUDITS_TABLE", "Audits")
         monkeypatch.setenv("BUCKET_NAME", "reports-bucket")
+        monkeypatch.setenv("AWS_ACCOUNT_ID", "123456789012")
         table = boto3.resource("dynamodb").create_table(
             TableName="Audits",
             KeySchema=[

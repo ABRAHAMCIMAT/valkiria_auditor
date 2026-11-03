@@ -14,6 +14,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from evaluate_model import load_holdout  # noqa: E402
+from safe_paths import resolve_in_workspace  # noqa: E402
 
 MIN_CONCORDANCE_GAIN = 0.05
 MIN_VALID_RATE = 0.95
@@ -57,7 +58,8 @@ def decide(baseline: dict, candidate: dict) -> list[str]:
 
 
 def load_predictions(path: Path) -> dict:
-    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    text = resolve_in_workspace(path).read_text(encoding="utf-8")
+    rows = [json.loads(line) for line in text.splitlines() if line.strip()]
     return {row["control_id"]: row.get("prediction") for row in rows}
 
 

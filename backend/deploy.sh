@@ -53,7 +53,7 @@ echo "[4/5] Checking CDK..."
 npx cdk --version || { echo "ERROR: CDK not available. Run: npm install -g aws-cdk@2.200.0"; exit 1; }
 
 echo "[5/5] Checking Docker (builds the agent and Lambda images)..."
-docker info > /dev/null || { echo "ERROR: Docker is not running."; exit 1; }
+docker info > /dev/null || { echo "ERROR: Docker is not running." >&2; exit 1; }
 
 echo "✓ All prerequisites verified."
 
@@ -74,7 +74,7 @@ echo ""
 echo "──── Phase 3: Deploying Ingestion Stack ────"
 
 cd "$PROJECT_ROOT/actividad1.16/cdk"
-npm install --silent
+npm install --silent --ignore-scripts
 echo "  Synthesizing..."
 npx cdk synth --quiet
 echo "  Deploying..."
@@ -120,8 +120,8 @@ KB_ID=$(aws bedrock-agent list-knowledge-bases --region "$REGION" \
     --query "knowledgeBaseSummaries[?name=='iso27001-compliance-kb'].knowledgeBaseId" \
     --output text 2>/dev/null || echo "")
 
-if [ -z "$KB_ID" ] || [ "$KB_ID" = "None" ]; then
-    echo "ERROR: Knowledge Base iso27001-compliance-kb not found. Wait for the ingestion pipeline and run this again."
+if [[ -z "$KB_ID" ]] || [[ "$KB_ID" = "None" ]]; then
+    echo "ERROR: Knowledge Base iso27001-compliance-kb not found. Wait for the ingestion pipeline and run this again." >&2
     exit 1
 fi
 echo "  Knowledge Base ID: $KB_ID"
@@ -135,13 +135,15 @@ echo ""
 echo "──── Phase 6: Deploying Frontend and AgentCore stacks ────"
 
 cd "$SCRIPT_DIR/cdk"
-npm install --silent
+npm install --silent --ignore-scripts
 npx cdk deploy Iso27001FrontendStack Iso27001AgentCoreStack \
     -c knowledgeBaseId="$KB_ID" --require-approval never --exclusively
 
 stack_output() {
-    aws cloudformation describe-stacks --stack-name "$1" --region "$REGION" \
-        --query "Stacks[0].Outputs[?OutputKey=='$2'].OutputValue" --output text
+    local stack_name="$1"
+    local output_key="$2"
+    aws cloudformation describe-stacks --stack-name "$stack_name" --region "$REGION" \
+        --query "Stacks[0].Outputs[?OutputKey=='$output_key'].OutputValue" --output text
 }
 
 SITE_URL=$(stack_output Iso27001FrontendStack SiteUrl)
@@ -156,7 +158,7 @@ echo ""
 echo "──── Phase 7: Deploying SAST Pipeline stack ────"
 
 cd "$PROJECT_ROOT/deliverables/pipeline/cdk"
-npm install --silent
+npm install --silent --ignore-scripts
 npx cdk deploy -c knowledgeBaseId="$KB_ID" -c allowedOrigin="$SITE_URL" --require-approval never
 
 SAST_UPLOAD_ARN=$(stack_output Iso27001SastPipelineStack UploadLambdaArn)
@@ -200,10 +202,10 @@ echo "──── Phase 10: Validation ────"
 
 # Audits require a signed-in user: an anonymous call must be rejected
 RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "${API_ENDPOINT}auditorias" --max-time 30 || echo "timeout")
-if [ "$RESPONSE" = "401" ]; then
+if [[ "$RESPONSE" = "401" ]]; then
     echo "  ✓ API rejects anonymous requests (HTTP 401)"
 else
-    echo "  ERROR: anonymous request returned HTTP $RESPONSE, expected 401"
+    echo "  ERROR: anonymous request returned HTTP $RESPONSE, expected 401" >&2
     exit 1
 fi
 

@@ -369,6 +369,7 @@ def _run_audit_in_background(payload: dict, session_id: str, actor_id: str, task
             Key=report_key,
             Body=report.encode("utf-8"),
             ContentType="text/markdown; charset=utf-8",
+            ExpectedBucketOwner=os.environ["AWS_ACCOUNT_ID"],
         )
         update_audit_status(tenant_id, audit_id, ESTADO_COMPLETADA, report_key=report_key)
     except Exception as exc:

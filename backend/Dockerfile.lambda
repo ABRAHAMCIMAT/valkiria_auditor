@@ -5,6 +5,9 @@ FROM public.ecr.aws/lambda/python:3.12
 
 ARG SERVICE
 COPY ${SERVICE}/requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt -t "${LAMBDA_TASK_ROOT}"
+RUN pip install --no-cache-dir --only-binary :all: -r /tmp/requirements.txt -t "${LAMBDA_TASK_ROOT}"
 
-COPY . ${LAMBDA_TASK_ROOT}/backend/
+COPY ${SERVICE} ${LAMBDA_TASK_ROOT}/backend/${SERVICE}/
+COPY agentcore/shared ${LAMBDA_TASK_ROOT}/backend/agentcore/shared/
+COPY observability ${LAMBDA_TASK_ROOT}/backend/observability/
+COPY models ${LAMBDA_TASK_ROOT}/backend/models/

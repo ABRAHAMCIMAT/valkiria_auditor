@@ -16,8 +16,10 @@ from datetime import datetime, timezone
 
 from botocore.config import Config
 
-s3_client = boto3.client('s3', config=Config(signature_version='s3v4'))
-dynamodb = boto3.resource('dynamodb')
+AWS_CONFIG = Config(signature_version='s3v4', connect_timeout=3, read_timeout=10)
+
+s3_client = boto3.client('s3', config=AWS_CONFIG)
+dynamodb = boto3.resource('dynamodb', config=Config(connect_timeout=3, read_timeout=10))
 
 BUCKET_NAME = os.environ['BUCKET_NAME']
 UPLOAD_KEY = os.environ['UPLOAD_KEY']
@@ -26,6 +28,7 @@ ALLOWED_ORIGIN = os.environ.get('ALLOWED_ORIGIN', '*')
 URL_EXPIRATION = int(os.environ.get('URL_EXPIRATION_SECONDS', '3600'))
 UNSAFE_METADATA = re.compile(r'[^A-Za-z0-9._ -]')
 MAX_METADATA_LENGTH = 128
+ZIP_CONTENT_TYPE = 'application/zip'
 
 
 def json_response(status, body):
@@ -90,7 +93,7 @@ def lambda_handler(event, context):
             Params={
                 'Bucket': BUCKET_NAME,
                 'Key': UPLOAD_KEY,
-                'ContentType': 'application/zip',
+                'ContentType': ZIP_CONTENT_TYPE,
                 'Metadata': metadata,
             },
             ExpiresIn=URL_EXPIRATION,
@@ -112,10 +115,10 @@ def lambda_handler(event, context):
             'bucket': BUCKET_NAME,
             'key': UPLOAD_KEY,
             'expiresIn': URL_EXPIRATION,
-            'contentType': 'application/zip',
+            'contentType': ZIP_CONTENT_TYPE,
             # SigV4 signs the metadata, so S3 rejects a PUT without these exact headers
             'headers': {
-                'Content-Type': 'application/zip',
+                'Content-Type': ZIP_CONTENT_TYPE,
                 **{f'x-amz-meta-{name}': value for name, value in metadata.items()},
             },
             'instructions': 'Use HTTP PUT sending every header in "headers"',

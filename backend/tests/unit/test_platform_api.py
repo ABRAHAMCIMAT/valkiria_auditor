@@ -209,7 +209,7 @@ class TestAuditLifecycle:
         monkeypatch.setattr(api, "ORCHESTRATOR_RUNTIME_ARN", "arn:runtime")
         runtime = MagicMock()
         runtime.invoke_agent_runtime.return_value = {"response": MagicMock()}
-        monkeypatch.setattr(api.boto3, "client", lambda name: runtime)
+        monkeypatch.setattr(api, "agentcore_client", runtime)
         item = create(api)
         status, _ = call(api, "POST", "/audit/{framework}", tenant="acme",
                          params={"framework": "strands"}, body={"audit_id": item["id"]})

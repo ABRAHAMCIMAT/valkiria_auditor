@@ -59,8 +59,10 @@ class TestTokenization:
         assert tokens["labels"] == [-100, -100, -100, -100, 6, 7, 8, 2]
 
     def test_example_that_does_not_fit_is_an_error_not_truncated(self):
+        example = self.example()
+        tokenizer = FakeTokenizer()
         with pytest.raises(ValueError, match="does not fit"):
-            train_qlora.tokenize_example(self.example(), FakeTokenizer(), 6)
+            train_qlora.tokenize_example(example, tokenizer, 6)
 
     def test_collate_pads_labels_with_ignore_index(self):
         batch = train_qlora.collate([
@@ -69,6 +71,12 @@ class TestTokenization:
         ], pad_token_id=0)
         assert batch["labels"][1].tolist() == [1, -100, -100]
         assert batch["attention_mask"][1].tolist() == [1, 0, 0]
+
+
+class TestDataDirs:
+    def test_directories_outside_the_allowed_locations_are_rejected(self):
+        with pytest.raises(ValueError):
+            train_qlora.resolve_data_dir("/etc")
 
 
 class TestLora:
@@ -87,7 +95,8 @@ class TestLora:
 
         model = train_qlora.apply_lora(copy.deepcopy(tiny_mistral3), lora_r=2, lora_alpha=4)
         trainable = [n for n, p in model.named_parameters() if p.requires_grad]
-        assert trainable and all("lora_" in n for n in trainable)
+        assert trainable
+        assert all("lora_" in n for n in trainable)
         assert not [n for n in trainable if "vision" in n]
 
         batch = train_qlora.collate(
