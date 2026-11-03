@@ -150,49 +150,35 @@ const API = (() => {
     }
   }
 
+  function mockCreated(collection, body, extra) {
+    const today = new Date().toISOString().split('T')[0];
+    const created = { id: collection.length + 1, ...body, creada: today, actualizacion: today, estado: 'pendiente', ...extra };
+    collection.push(created);
+    return created;
+  }
+
+  function mockResolve(method, path, body) {
+    const isAudit = path.includes('/auditorias');
+    const isEvaluation = path.includes('/evaluaciones');
+    const isFramework = ['/audit/strands', '/audit/langgraph', '/audit/crewai'].some(route => path.includes(route));
+    const routes = [
+      [isAudit && method === 'GET' && !path.includes('/auditorias/'), () => [...mockAuditorias]],
+      [/\/auditorias\/\d+/.test(path) && method === 'GET', () => ({ ...mockAuditoriaDetalle })],
+      [isAudit && method === 'POST', () => mockCreated(mockAuditorias, body, { completada: null })],
+      [isAudit && method === 'DELETE', () => ({ success: true })],
+      [isEvaluation && method === 'GET', () => [...mockEvaluaciones]],
+      [isEvaluation && method === 'POST', () => mockCreated(mockEvaluaciones, body, { resultado: null })],
+      [path.includes('/sast/upload-url'), () => ({ uploadUrl: '', headers: {} })],
+      [isFramework, () => ({ status: 'ejecutando', agente: path.split('/').pop(), mensaje: 'Auditoría ISO 27001:2022 iniciada' })],
+      [path.includes('/audit/comp2013'), () => ({ status: 'ejecutando', mensaje: 'Auditoría ISO 27001:2013 iniciada' })],
+    ];
+    const route = routes.find(([matches]) => matches);
+    return route ? route[1]() : {};
+  }
+
   function mockResponse(method, path, body) {
     return new Promise((resolve) => {
-      setTimeout(() => {
-        if (path.includes('/auditorias') && method === 'GET' && !path.includes('/auditorias/')) {
-          resolve([...mockAuditorias]);
-        } else if (path.match(/\/auditorias\/\d+/) && method === 'GET') {
-          resolve({ ...mockAuditoriaDetalle });
-        } else if (path.includes('/auditorias') && method === 'POST') {
-          const newAuditoria = {
-            id: mockAuditorias.length + 1,
-            ...body,
-            creada: new Date().toISOString().split('T')[0],
-            actualizacion: new Date().toISOString().split('T')[0],
-            completada: null,
-            estado: 'pendiente'
-          };
-          mockAuditorias.push(newAuditoria);
-          resolve(newAuditoria);
-        } else if (path.includes('/auditorias') && method === 'DELETE') {
-          resolve({ success: true });
-        } else if (path.includes('/evaluaciones') && method === 'GET') {
-          resolve([...mockEvaluaciones]);
-        } else if (path.includes('/evaluaciones') && method === 'POST') {
-          const newEval = {
-            id: mockEvaluaciones.length + 1,
-            ...body,
-            creada: new Date().toISOString().split('T')[0],
-            actualizacion: new Date().toISOString().split('T')[0],
-            estado: 'pendiente',
-            resultado: null
-          };
-          mockEvaluaciones.push(newEval);
-          resolve(newEval);
-        } else if (path.includes('/sast/upload-url')) {
-          resolve({ uploadUrl: '', headers: {} });
-        } else if (path.includes('/audit/strands') || path.includes('/audit/langgraph') || path.includes('/audit/crewai')) {
-          resolve({ status: 'ejecutando', agente: path.split('/').pop(), mensaje: 'Auditoría ISO 27001:2022 iniciada' });
-        } else if (path.includes('/audit/comp2013')) {
-          resolve({ status: 'ejecutando', mensaje: 'Auditoría ISO 27001:2013 iniciada' });
-        } else {
-          resolve({});
-        }
-      }, 300);
+      setTimeout(() => resolve(mockResolve(method, path, body)), 300);
     });
   }
 

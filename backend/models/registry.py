@@ -249,12 +249,12 @@ def list_models_by_latency(profile: LatencyProfile) -> list[ModelSpec]:
     return [m for m in BEDROCK_MODELS.values() if m.latency_profile == profile]
 
 
-def get_recommended_models_for_agent(agent_role: str) -> list[str]:
+def get_recommended_models_for_agent(_agent_role: str) -> list[str]:
     """
     Get recommended model keys for a specific agent role.
 
     Args:
-        agent_role: One of 'planning', 'evidence', 'organizational',
+        _agent_role: One of 'planning', 'evidence', 'organizational',
                     'people', 'technological', 'consolidation'.
 
     Returns:

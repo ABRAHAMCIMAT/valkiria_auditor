@@ -82,7 +82,8 @@ class TestOnlyClaudeInRuntimeDefaults:
         backend = Path(__file__).resolve().parents[2]
         for relative in ("strandsagents", "langgraph", "crewai"):
             source = (backend / relative / "orchestrator.py").read_text()
-            assert "gpt-oss" not in source and "qwen" not in source
+            assert "gpt-oss" not in source
+            assert "qwen" not in source
 
     def test_recommendations_use_only_sonnet(self):
         from backend.models.registry import BEDROCK_MODELS, get_recommended_models_for_agent

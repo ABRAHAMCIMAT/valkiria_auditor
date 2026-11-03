@@ -6,8 +6,8 @@ ARG AGENT_DIR
 ENV AGENT_DIR=${AGENT_DIR} PYTHONUNBUFFERED=1 DOCKER_CONTAINER=1
 
 WORKDIR /app
-COPY ${AGENT_DIR}/requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir --only-binary :all: -r requirements.txt
+COPY ${AGENT_DIR}/requirements.lock ./requirements.lock
+RUN pip install --no-cache-dir --only-binary :all: --require-hashes -r requirements.lock
 
 # src/main.py adds ../.. to sys.path, so shared/ must sit two levels above it
 COPY shared ./shared

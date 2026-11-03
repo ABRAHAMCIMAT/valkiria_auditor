@@ -19,7 +19,7 @@ const Auth = (() => {
     userPoolId: 'us-east-1_mniJzgGj2',
     clientId: '2mqmee5jm62j1q77q6dmmkto34',
     // config.js, generado en el despliegue, apunta al User Pool del stack
-    ...(window.__APP_CONFIG__ || {}),
+    ...window.__APP_CONFIG__,
   };
 
   const COGNITO_ENDPOINT = `https://cognito-idp.${CONFIG.region}.amazonaws.com/`;

@@ -74,4 +74,6 @@ docker run -p 8080:8080 planning
 curl localhost:8080/ping
 ```
 
+Each agent's image installs from `requirements.lock`, with hashes for Linux ARM64. After changing a `requirements.txt`, regenerate it with `./lock_requirements.sh`.
+
 See `IMPLEMENTATION.md` for details and current status.
