@@ -323,7 +323,7 @@ const AuditoriasPage = {
     // Individual remove buttons
     listEl.querySelectorAll('.uploaded-file__remove').forEach(btn => {
       btn.addEventListener('click', () => {
-        this.uploadedFiles.splice(parseInt(btn.dataset.index), 1);
+        this.uploadedFiles.splice(Number.parseInt(btn.dataset.index, 10), 1);
         this.renderFileList(listEl);
       });
     });

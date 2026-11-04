@@ -5,7 +5,7 @@ import { SastPipelineStack } from '../lib/sast-pipeline-stack';
 
 const app = new cdk.App();
 
-new SastPipelineStack(app, 'Iso27001SastPipelineStack', {
+export const sastPipelineStack = new SastPipelineStack(app, 'Iso27001SastPipelineStack', {
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION || 'us-east-1',

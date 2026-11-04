@@ -58,6 +58,7 @@ def set_env_vars(monkeypatch):
     monkeypatch.setenv("FINDINGS_TABLE", "AuditFindings")
     monkeypatch.setenv("DOCUMENTS_TABLE", "Documents")
     monkeypatch.setenv("METRICS_TABLE", "AgentCoreMetrics")
+    monkeypatch.setenv("AWS_ACCOUNT_ID", "123456789012")
     monkeypatch.setenv("PRIMARY_MODEL_ID", "us.anthropic.claude-sonnet-4-5-20250929-v1:0")
     monkeypatch.setenv("FAST_MODEL_ID", "us.anthropic.claude-sonnet-4-5-20250929-v1:0")
     monkeypatch.setenv("VECTOR_STORE_BUCKET", "iso27001-vectors-e16")

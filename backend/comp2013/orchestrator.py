@@ -385,6 +385,7 @@ def run_audit(
             s3.put_object(
                 Bucket=BUCKET_NAME,
                 Key=report_key,
+                ExpectedBucketOwner=os.environ["AWS_ACCOUNT_ID"],
                 Body=json.dumps({
                     "audit_id": audit_id,
                     "framework": "comp2013",

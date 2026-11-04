@@ -96,7 +96,7 @@ def analyze_sast_findings(
     s3 = boto3.client("s3", region_name=os.environ.get("AWS_REGION", "us-east-1"))
 
     try:
-        response = s3.get_object(Bucket=bucket, Key=sast_report_s3_key)
+        response = s3.get_object(Bucket=bucket, Key=sast_report_s3_key, ExpectedBucketOwner=os.environ["AWS_ACCOUNT_ID"])
         report = json.loads(response["Body"].read().decode("utf-8"))
     except Exception as exc:
         return {"error": f"Failed to retrieve SAST report: {exc}"}

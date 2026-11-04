@@ -30,6 +30,7 @@ export class SastPipelineStack extends cdk.Stack {
     // ─────────────────────────────────────────────
     const sourceBucket = new s3.Bucket(this, 'SastSourceBucket', {
       bucketName: `iso27001-sast-source-${this.account}`,
+      enforceSSL: true,
       versioned: true, // Required for CodePipeline S3 source
       encryption: s3.BucketEncryption.S3_MANAGED,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
@@ -56,6 +57,7 @@ export class SastPipelineStack extends cdk.Stack {
     // ─────────────────────────────────────────────
     const resultsBucket = new s3.Bucket(this, 'SastResultsBucket', {
       bucketName: `iso27001-sast-results-${this.account}`,
+      enforceSSL: true,
       versioned: true,
       encryption: s3.BucketEncryption.S3_MANAGED,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,

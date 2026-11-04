@@ -21,9 +21,10 @@ import json
 import os
 import uuid
 import boto3
+from botocore.config import Config
 from botocore.exceptions import ClientError
 
-s3_client = boto3.client("s3")
+s3_client = boto3.client("s3", config=Config(connect_timeout=3, read_timeout=10))
 
 BUCKET_NAME         = os.environ["BUCKET_NAME"]
 UPLOAD_PREFIX       = os.environ.get("UPLOAD_PREFIX", "raw/")

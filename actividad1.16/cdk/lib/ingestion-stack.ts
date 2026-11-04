@@ -21,6 +21,7 @@ export class IngestionStack extends cdk.Stack {
     const dataBucket = new s3.Bucket(this, 'Iso27001DataBucket', {
       bucketName: `iso27001-compliance-rag-${this.account}`,
       versioned: true,
+      enforceSSL: true,
       encryption: s3.BucketEncryption.S3_MANAGED,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
@@ -232,6 +233,7 @@ export class IngestionStack extends cdk.Stack {
       memorySize: 256,
       environment: {
         BUCKET_NAME: dataBucket.bucketName,
+        AWS_ACCOUNT_ID: this.account,
         UPLOAD_PREFIX: 'raw/',
         URL_EXPIRATION_SECONDS: '3600',
       },
@@ -253,6 +255,7 @@ export class IngestionStack extends cdk.Stack {
       memorySize: 1024,
       environment: {
         BUCKET_NAME: dataBucket.bucketName,
+        AWS_ACCOUNT_ID: this.account,
         RAW_PREFIX: 'raw/',
         RESULTS_PREFIX: 'eda_results/',
       },
@@ -278,6 +281,7 @@ export class IngestionStack extends cdk.Stack {
       memorySize: 512,
       environment: {
         BUCKET_NAME:                dataBucket.bucketName,
+        AWS_ACCOUNT_ID: this.account,
         RAW_PREFIX:                 'raw/',
         KB_NAME:                    'iso27001-compliance-kb',
         KB_DESCRIPTION:             'ISO 27001:2022 compliance evaluation knowledge base',
@@ -318,6 +322,7 @@ export class IngestionStack extends cdk.Stack {
       memorySize: 512,
       environment: {
         BUCKET_NAME:          dataBucket.bucketName,
+        AWS_ACCOUNT_ID: this.account,
         VALIDATION_PREFIX:    'validation/',
         // Generation model for RetrieveAndGenerate
         // Nova Pro: latest Amazon Nova, strong reasoning, available in us-east-1
@@ -499,6 +504,7 @@ def handler(event, context):
         requestTemplates: { 'application/json': '{ "statusCode": "200" }' },
       }),
       {
+        authorizationType: apigateway.AuthorizationType.IAM,
         methodResponses: [
           {
             statusCode: '200',
@@ -565,7 +571,8 @@ def handler(event, context):
 
     executionResource.addMethod(
       'GET',
-      new apigateway.LambdaIntegration(statusLambda)
+      new apigateway.LambdaIntegration(statusLambda),
+      { authorizationType: apigateway.AuthorizationType.IAM },
     );
 
     // ─────────────────────────────────────────────
