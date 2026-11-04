@@ -12,6 +12,7 @@ import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as ecrAssets from 'aws-cdk-lib/aws-ecr-assets';
+import * as kms from 'aws-cdk-lib/aws-kms';
 import * as path from 'path';
 
 export interface BackendStackProps extends cdk.StackProps {
@@ -214,6 +215,7 @@ export class BackendStack extends cdk.Stack {
       FAST_MODEL_ID: 'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
       KNOWLEDGE_BASE_ID: this.node.tryGetContext('knowledgeBaseId') || '',
       AUDITS_TABLE: props.auditsTable.tableName,
+      AWS_ACCOUNT_ID: this.account,
       LOG_LEVEL: 'INFO',
     };
 
@@ -424,9 +426,17 @@ export class BackendStack extends cdk.Stack {
     // ─────────────────────────────────────────────────────────────────────
     // 8. SNS TOPIC — Alerts
     // ─────────────────────────────────────────────────────────────────────
+    // Customer-managed key: CloudWatch alarms cannot publish with the AWS-managed SNS key
+    const alertsKey = new kms.Key(this, 'AlertsTopicKey', {
+      description: 'Encrypts the ISO 27001 audit alerts topic',
+      enableKeyRotation: true,
+    });
+    alertsKey.grant(new iam.ServicePrincipal('cloudwatch.amazonaws.com'), 'kms:Decrypt', 'kms:GenerateDataKey*');
+
     const alertsTopic = new sns.Topic(this, 'AlertsTopic', {
       topicName: 'iso27001-audit-alerts',
       displayName: 'ISO 27001 Audit System Alerts',
+      masterKey: alertsKey,
     });
 
     // ─────────────────────────────────────────────────────────────────────

@@ -7,7 +7,7 @@ const app = new cdk.App();
 
 const stage = app.node.tryGetContext('stage') || 'dev';
 
-new PlatformStack(app, `Iso27001PlatformStack-${stage}`, {
+export const platformStack = new PlatformStack(app, `Iso27001PlatformStack-${stage}`, {
   stage,
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
