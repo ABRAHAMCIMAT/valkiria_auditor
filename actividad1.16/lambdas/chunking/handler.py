@@ -50,6 +50,7 @@ import uuid
 from typing import Any
 
 import boto3
+from botocore.config import Config
 from botocore.exceptions import ClientError
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -99,7 +100,11 @@ POLL_INTERVAL    = int(os.environ.get("POLL_INTERVAL_SECONDS", "15"))
 # AWS CLIENTS
 # ─────────────────────────────────────────────────────────────────────────────
 
-bedrock_agent = boto3.client("bedrock-agent", region_name=REGION)
+bedrock_agent = boto3.client(
+    "bedrock-agent",
+    region_name=REGION,
+    config=Config(connect_timeout=5, read_timeout=30),
+)
 
 
 # ─────────────────────────────────────────────────────────────────────────────

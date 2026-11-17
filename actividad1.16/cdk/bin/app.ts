@@ -5,7 +5,7 @@ import { IngestionStack } from '../lib/ingestion-stack';
 
 const app = new cdk.App();
 
-new IngestionStack(app, 'Iso27001IngestionStack', {
+export const ingestionStack = new IngestionStack(app, 'Iso27001IngestionStack', {
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region:  process.env.CDK_DEFAULT_REGION ?? 'us-east-1',

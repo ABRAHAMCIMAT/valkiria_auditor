@@ -51,12 +51,15 @@ import uuid
 from typing import Any
 
 import boto3
+from botocore.config import Config
+from botocore.exceptions import ClientError
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CONFIGURATION
 # ─────────────────────────────────────────────────────────────────────────────
 
 BUCKET_NAME       = os.environ["BUCKET_NAME"]
+AWS_ACCOUNT_ID    = os.environ["AWS_ACCOUNT_ID"]
 VALIDATION_PREFIX = os.environ.get("VALIDATION_PREFIX", "validation/")
 REGION            = os.environ.get("AWS_REGION", "us-east-1")
 
@@ -79,8 +82,12 @@ NUMBER_OF_RESULTS = int(os.environ.get("NUMBER_OF_RESULTS", "5"))
 # AWS CLIENTS
 # ─────────────────────────────────────────────────────────────────────────────
 
-bedrock_agent_runtime = boto3.client("bedrock-agent-runtime", region_name=REGION)
-s3_client             = boto3.client("s3")
+bedrock_agent_runtime = boto3.client(
+    "bedrock-agent-runtime",
+    region_name=REGION,
+    config=Config(connect_timeout=5, read_timeout=60),
+)
+s3_client = boto3.client("s3", config=Config(connect_timeout=5, read_timeout=30))
 
 # ─────────────────────────────────────────────────────────────────────────────
 # VALIDATION QUERIES
@@ -254,12 +261,17 @@ def lambda_handler(event: dict, context: Any) -> dict:
 
     # Save validation report to S3
     report_key = f"{VALIDATION_PREFIX}{uuid.uuid4().hex[:8]}_{file_name}_validation.json"
-    s3_client.put_object(
-        Bucket=BUCKET_NAME,
-        Key=report_key,
-        Body=json.dumps(validation_report, ensure_ascii=False, indent=2),
-        ContentType="application/json",
-    )
+    try:
+        s3_client.put_object(
+            Bucket=BUCKET_NAME,
+            Key=report_key,
+            Body=json.dumps(validation_report, ensure_ascii=False, indent=2),
+            ContentType="application/json",
+            ExpectedBucketOwner=AWS_ACCOUNT_ID,
+        )
+    except ClientError as e:
+        print(f"[ERROR] Could not store validation report at {report_key}: {e}")
+        raise
 
     print(f"[INFO] Validation report saved to s3://{BUCKET_NAME}/{report_key}")
     print(f"[INFO] Summary: {queries_with_results}/{len(results)} queries returned results, "

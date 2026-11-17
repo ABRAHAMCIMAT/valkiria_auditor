@@ -26,7 +26,7 @@ const agentCore = new AgentCoreStack(app, 'Iso27001AgentCoreStack', {
 });
 
 // The SAST stack is a separate CDK app: pass its outputs to expose it in this API
-new BackendStack(app, 'Iso27001BackendStack', {
+export const backendStack = new BackendStack(app, 'Iso27001BackendStack', {
   env,
   tags,
   userPool: frontend.userPool,

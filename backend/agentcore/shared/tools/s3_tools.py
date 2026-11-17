@@ -32,7 +32,7 @@ def get_document_content(s3_key: str) -> dict:
     if not BUCKET_NAME:
         return {"error": "BUCKET_NAME not configured"}
 
-    response = s3_client.get_object(Bucket=BUCKET_NAME, Key=s3_key)
+    response = s3_client.get_object(Bucket=BUCKET_NAME, Key=s3_key, ExpectedBucketOwner=os.environ["AWS_ACCOUNT_ID"])
     content_type = response["ContentType"]
     body = response["Body"].read()
 
@@ -84,6 +84,7 @@ def save_report_to_s3(
         Key=s3_key,
         Body=report_content.encode("utf-8"),
         ContentType=content_type,
+        ExpectedBucketOwner=os.environ["AWS_ACCOUNT_ID"],
         Metadata={
             "audit_id": audit_id,
             "report_type": report_type,

@@ -25,6 +25,11 @@ BUCKET_NAME = os.environ.get("S3_BUCKET_NAME")
 FOLDERS = ["raw/", "processed/", "analytical/"]
 
 
+def _bucket_owner() -> str:
+    """Account the project's buckets must belong to: the one running this script."""
+    return session.client("sts", verify=False).get_caller_identity()["Account"]
+
+
 def create_bucket_structure(bucket_name: str = BUCKET_NAME) -> None:
     """
     Create bucket folder structure if it does not exist.
@@ -38,7 +43,7 @@ def create_bucket_structure(bucket_name: str = BUCKET_NAME) -> None:
     """
     for folder in FOLDERS:
         try:
-            s3_client.put_object(Bucket=bucket_name, Key=folder, Body=b"")
+            s3_client.put_object(Bucket=bucket_name, Key=folder, Body=b"", ExpectedBucketOwner=_bucket_owner())
             print(f"  [ok] s3://{bucket_name}/{folder}")
         except ClientError as e:
             print(f"  [error] s3://{bucket_name}/{folder}: {e}")
@@ -69,7 +74,7 @@ def upload_files_to_raw(
         # Single file upload
         file_name = os.path.basename(local_path)
         s3_key = f"{prefix}{file_name}"
-        s3_client.upload_file(local_path, bucket_name, s3_key)
+        s3_client.upload_file(local_path, bucket_name, s3_key, ExtraArgs={"ExpectedBucketOwner": _bucket_owner()})
         uploaded_keys.append(s3_key)
         print(f"  [uploaded] {local_path} -> s3://{bucket_name}/{s3_key}")
 
@@ -90,7 +95,7 @@ def upload_files_to_raw(
             # Preserve relative directory structure under the prefix
             relative_path = os.path.relpath(file_path, local_path)
             s3_key = f"{prefix}{relative_path.replace(os.sep, '/')}"
-            s3_client.upload_file(file_path, bucket_name, s3_key)
+            s3_client.upload_file(file_path, bucket_name, s3_key, ExtraArgs={"ExpectedBucketOwner": _bucket_owner()})
             uploaded_keys.append(s3_key)
             print(f"  [uploaded] {file_path} -> s3://{bucket_name}/{s3_key}")
     else:

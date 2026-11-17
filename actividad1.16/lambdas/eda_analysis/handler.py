@@ -34,10 +34,13 @@ from typing import Any
 
 import boto3
 import PyPDF2
+from botocore.config import Config
+from botocore.exceptions import ClientError
 
-s3_client = boto3.client("s3")
+s3_client = boto3.client("s3", config=Config(connect_timeout=5, read_timeout=60))
 
 BUCKET_NAME     = os.environ["BUCKET_NAME"]
+AWS_ACCOUNT_ID  = os.environ["AWS_ACCOUNT_ID"]
 RESULTS_PREFIX  = os.environ.get("RESULTS_PREFIX", "eda_results/")
 
 
@@ -222,7 +225,11 @@ def lambda_handler(event: dict, context: Any) -> dict:
     print(f"[INFO] EDA starting for s3://{bucket}/{key}")
 
     # Download file from S3
-    response  = s3_client.get_object(Bucket=bucket, Key=key)
+    try:
+        response = s3_client.get_object(Bucket=bucket, Key=key, ExpectedBucketOwner=AWS_ACCOUNT_ID)
+    except ClientError as e:
+        print(f"[ERROR] Could not download s3://{bucket}/{key}: {e}")
+        raise
     file_bytes = response["Body"].read()
 
     # Dispatch by file type
@@ -244,12 +251,17 @@ def lambda_handler(event: dict, context: Any) -> dict:
 
     # Persist EDA results to S3
     results_key = f"{RESULTS_PREFIX}{uuid.uuid4().hex[:8]}_{file_name}_eda.json"
-    s3_client.put_object(
-        Bucket=BUCKET_NAME,
-        Key=results_key,
-        Body=json.dumps(eda_result, ensure_ascii=False, indent=2),
-        ContentType="application/json",
-    )
+    try:
+        s3_client.put_object(
+            Bucket=BUCKET_NAME,
+            Key=results_key,
+            Body=json.dumps(eda_result, ensure_ascii=False, indent=2),
+            ContentType="application/json",
+            ExpectedBucketOwner=AWS_ACCOUNT_ID,
+        )
+    except ClientError as e:
+        print(f"[ERROR] Could not store EDA results at {results_key}: {e}")
+        raise
 
     print(f"[INFO] EDA results saved to s3://{BUCKET_NAME}/{results_key}")
     print(f"[INFO] EDA summary: {json.dumps(eda_result, default=str)[:500]}")

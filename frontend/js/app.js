@@ -216,10 +216,14 @@ const App = (() => {
     }
 
     // Listen for hash changes
-    window.addEventListener('hashchange', navigate);
+    window.addEventListener('hashchange', () => navigateSafely());
 
     // Initial navigation
-    navigate();
+    navigateSafely();
+  }
+
+  function navigateSafely() {
+    navigate().catch(() => showToast('No se pudo cargar la página', 'error'));
   }
 
   document.addEventListener('DOMContentLoaded', init);

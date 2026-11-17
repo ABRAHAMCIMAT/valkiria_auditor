@@ -14,3 +14,4 @@ CLAUDE.md
 # CDK build output
 node_modules/
 cdk.out/
+backend/cdk/dist/

@@ -337,6 +337,8 @@ export class PlatformStack extends cdk.Stack {
     // S3 bucket for frontend static assets (React Native web build)
     this.staticAssetsBucket = new s3.Bucket(this, 'StaticAssetsBucket', {
       bucketName: `iso27001-platform-static-${stage}-${this.account}`,
+      versioned: true,
+      enforceSSL: true,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,

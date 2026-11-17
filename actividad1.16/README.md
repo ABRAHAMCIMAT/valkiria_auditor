@@ -46,7 +46,7 @@ npx cdk deploy
 
 ## Flujo de ejecución
 
-1. Cliente solicita URL prefirmada vía API Gateway → Lambda `presigned_url`
+1. Cliente solicita URL prefirmada vía API Gateway (requiere firma SigV4 con permisos IAM) → Lambda `presigned_url`
 2. Cliente sube archivo directamente a S3 con la URL prefirmada
 3. S3 Event Notification dispara Step Functions
 4. Step Functions ejecuta en secuencia:

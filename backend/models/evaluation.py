@@ -281,41 +281,23 @@ class ModelEvaluator:
                 "Builtin.ProfessionalStyleAndTone",
             ]
 
-        # Build evaluation config based on type
-        if evaluation_type == "LLM_AS_JUDGE":
-            evaluation_config = {
-                "automated": {
-                    "datasetMetricConfigs": [
-                        {
-                            "taskType": "General",
-                            "metricNames": metrics,
-                            "dataset": {
-                                "name": job_name,
-                                "datasetLocation": {
-                                    "s3Uri": dataset_s3_uri,
-                                },
+        # Both evaluation types share the same automated configuration
+        evaluation_config = {
+            "automated": {
+                "datasetMetricConfigs": [
+                    {
+                        "taskType": "General",
+                        "metricNames": metrics,
+                        "dataset": {
+                            "name": job_name,
+                            "datasetLocation": {
+                                "s3Uri": dataset_s3_uri,
                             },
-                        }
-                    ]
-                }
+                        },
+                    }
+                ]
             }
-        else:
-            evaluation_config = {
-                "automated": {
-                    "datasetMetricConfigs": [
-                        {
-                            "taskType": "General",
-                            "metricNames": metrics,
-                            "dataset": {
-                                "name": job_name,
-                                "datasetLocation": {
-                                    "s3Uri": dataset_s3_uri,
-                                },
-                            },
-                        }
-                    ]
-                }
-            }
+        }
 
         # Build inference configs for each model
         inference_configs = []

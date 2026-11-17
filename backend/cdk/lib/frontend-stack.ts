@@ -25,6 +25,8 @@ export class FrontendStack extends cdk.Stack {
     // ─────────────────────────────────────────────────────────────────
     const websiteBucket = new s3.Bucket(this, 'FrontendBucket', {
       bucketName: `iso27001-frontend-${this.account}`,
+      versioned: true,
+      enforceSSL: true,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
