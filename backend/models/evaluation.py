@@ -24,6 +24,9 @@ EVALUATION_ROLE_ARN = os.environ.get("EVALUATION_ROLE_ARN", "")
 
 
 @dataclass
+EVALUATION_TYPES = {"LLM_AS_JUDGE", "AUTOMATED"}
+
+
 class EvaluationTask:
     """A single evaluation prompt with expected output."""
     prompt: str
@@ -280,6 +283,9 @@ class ModelEvaluator:
                 "Builtin.FollowingInstructions",
                 "Builtin.ProfessionalStyleAndTone",
             ]
+
+        if evaluation_type not in EVALUATION_TYPES:
+            raise ValueError(f"evaluation_type must be one of {sorted(EVALUATION_TYPES)}: {evaluation_type}")
 
         # Both evaluation types share the same automated configuration
         evaluation_config = {
