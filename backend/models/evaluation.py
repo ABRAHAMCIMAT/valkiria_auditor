@@ -23,10 +23,10 @@ EVALUATION_BUCKET = os.environ.get("EVALUATION_BUCKET", "")
 EVALUATION_ROLE_ARN = os.environ.get("EVALUATION_ROLE_ARN", "")
 
 
-@dataclass
 EVALUATION_TYPES = {"LLM_AS_JUDGE", "AUTOMATED"}
 
 
+@dataclass
 class EvaluationTask:
     """A single evaluation prompt with expected output."""
     prompt: str
